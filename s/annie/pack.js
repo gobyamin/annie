@@ -11,12 +11,19 @@
    큰따옴표만, 마지막 쉼표 금지, 객체 안 주석 금지.
    ──────────────────────────────────────────────────────────── */
 
+/* letters: 앱 01b·01d·01e 가 이 글자만 보여준다.
+   회차가 지날 때마다 여기에 더한다. 안 적으면 40자가 전부 나온다. */
 window.STUDENT_PACK = {
 
 "student": "Annie",
 "level": "Level 0 · lesson 2",
 "focus": "Madrid. Spanish and Italian speaker. Watches Korean drama with subtitles.",
 "note": "스페인어 5모음(a e i o u)이 ㅏㅔㅣㅗㅜ 에 그대로 붙는다. 여기서 자신감을 잡는다. ㅓ 와 ㅡ 는 대응 소리가 없어 제일 오래 걸리고, ㄱ/ㅋ/ㄲ 3단은 스페인어에 2단도 없어서 한참 뒤로 미룬다. ㄹ 은 pero 의 단타 r 이라 공짜다.",
+
+"letters": {
+  "vowels":     ["ㅏ", "ㅔ", "ㅣ", "ㅗ", "ㅜ"],
+  "consonants": ["ㄴ", "ㅇ"]
+},
 
 "blocks": {
   "targets": ["아", "이", "오", "우", "에", "니", "애"],

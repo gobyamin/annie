@@ -169,6 +169,7 @@ for (const id in BANKITEMS) {
 function size(p) {
   let n = 0;
   for (const e of fs.readdirSync(p, { withFileTypes: true })) {
+    if (e.name === '.git') continue;   // 저장소 자체는 올라가는 용량이 아니다
     const q = path.join(p, e.name);
     n += e.isDirectory() ? size(q) : fs.statSync(q).size;
   }

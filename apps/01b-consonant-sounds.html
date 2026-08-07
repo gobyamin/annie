@@ -183,7 +183,14 @@ button:active{transform:translate(2px,2px);box-shadow:none}
 <div class="keys"><b>Space</b> play the sound · <b>→</b> or <b>Enter</b> next letter</div>
 
 <script src="assets/_articulation.js"></script>
+<script src="_pack.js"></script>
+<script src="assets/_only.js"></script>
 <script>
+/* 학생 팩이 letters 를 적어뒀으면 그 글자만 남긴다. 없으면 전부 나온다. */
+var _acAll = ARTIC;
+ARTIC = ONLY(_acAll, 'consonants');
+if (!ARTIC.length) ARTIC = _acAll;
+
 var V='assets/voice/';
 var ZONES=[['lips','LIPS'],['ridge','BEHIND THE TEETH'],['palate','ROOF OF THE MOUTH'],
            ['velar','BACK OF THE MOUTH'],['throat','THROAT']];
@@ -199,7 +206,8 @@ var SAY={g:'그',n:'느',d:'드',r:'르',m:'므',b:'브',s:'스',ng:'응',j:'즈
          k:'크',t:'트',p:'프',h:'흐',kk:'끄',tt:'뜨',pp:'쁘',ss:'쓰',jj:'쯔'};
 function sayOf(x){ return SAY[(x.sound||'').replace('sound-','')] || ''; }
 
-var cur=byChar('ㄱ');
+/* ㄱ 을 아직 안 배운 학생이면 byChar 가 null 을 준다. 첫 글자로 떨어뜨린다. */
+var cur=byChar('ㄱ')||ARTIC[0];
 
 var picker=g('picker');
 ZONES.forEach(function(z){

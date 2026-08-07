@@ -143,7 +143,19 @@ button.big.go{background:var(--orange);color:#fff}
 <script src="assets/_vowels.js"></script>
 <script src="assets/_confusables.js"></script>
 <script src="assets/_progress.js"></script>
+<script src="_pack.js"></script>
+<script src="assets/_only.js"></script>
 <script>
+/* 학생 팩이 letters 를 적어뒀으면 그 글자만 남긴다. 없으면 전부 나온다. */
+var _acAll = ARTIC, _vbAll = VOWELS_BASIC, _vcAll = VOWELS_COMPOUND;
+ARTIC = ONLY(_acAll, 'consonants');
+VOWELS_BASIC = ONLY(_vbAll, 'vowels');
+VOWELS_COMPOUND = ONLY(_vcAll, 'vowels');
+/* 자음만 배웠거나 모음만 배운 상태는 정상이다. 셋 다 비면 그때만 되돌린다. */
+if (!ARTIC.length && !VOWELS_BASIC.length && !VOWELS_COMPOUND.length) {
+  ARTIC = _acAll; VOWELS_BASIC = _vbAll; VOWELS_COMPOUND = _vcAll;
+}
+
 var O='assets/img/obj/', V='assets/voice/';
 function g(id){ return document.getElementById(id); }
 
@@ -393,6 +405,14 @@ function shakyBtn(){
     '<b>↻ The wobbly ones · '+wob.length+'</b>'+
     '<span>Missed last time: <span class="kr">'+wob.join(' ')+'</span>. Clear these first.</span></button>';
 }
+/* 설명에도 실제로 배운 글자만 적는다. 안 배운 걸 나열하면 학생이 겁먹는다. */
+function letterList(scope){
+  var xs = POOL.filter(function(x){ return scope==='all' ? true : x.kind===scope; });
+  return xs.map(function(x){ return x.c; }).join(' ');
+}
+function countFor(scope){
+  return POOL.filter(function(x){ return scope==='all' ? true : x.kind===scope; }).length;
+}
 function home(){
   g('seal').textContent='✓';
   g('h1').textContent='Letter Checkpoint';
@@ -406,12 +426,15 @@ function home(){
     '</div>'+
     '<div class="choice">'+
       shakyBtn()+
-      '<button class="ch" data-s="consonant"><b>Consonants. 19</b><span>ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ ㅅ ㅇ ㅈ ㅊ ㅋ ㅌ ㅍ ㅎ and the five tense ones</span></button>'+
-      '<button class="ch" data-s="vowel"><b>Vowels. 21</b><span>ㅏ ㅑ ㅓ ㅕ ㅗ ㅛ ㅜ ㅠ ㅡ ㅣ and the eleven built from them</span></button>'+
-      '<button class="ch" data-s="all"><b>Everything. 40</b><span>The whole alphabet, shuffled together</span></button>'+
+      '<button class="ch" data-s="consonant"><b>Consonants</b><span>ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ ㅅ ㅇ ㅈ ㅊ ㅋ ㅌ ㅍ ㅎ and the five tense ones</span></button>'+
+      '<button class="ch" data-s="vowel"><b>Vowels</b><span>ㅏ ㅑ ㅓ ㅕ ㅗ ㅛ ㅜ ㅠ ㅡ ㅣ and the eleven built from them</span></button>'+
+      '<button class="ch" data-s="all"><b>Everything</b><span>The whole alphabet, shuffled together</span></button>'+
     '</div>'+
     '<div class="keys">Tap an answer. <b>1</b>–<b>4</b> also picks · <b>Space</b> replays the sound · <b>Enter</b> continues</div>';
   [].forEach.call(document.querySelectorAll('.ch'),function(b){
+    var nb=b.querySelector('b'), sp=b.querySelector('span');
+    if(nb) nb.textContent = nb.textContent + ' \u00b7 ' + countFor(b.dataset.s);
+    if(sp) sp.textContent = letterList(b.dataset.s);
     b.onclick=function(){ unlock(); start(b.dataset.s); };
   });
 }

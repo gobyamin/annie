@@ -128,7 +128,17 @@ button:active{transform:translate(2px,2px);box-shadow:none}
 <div class="keys"><b>Space</b> hear it · <b>→</b> or <b>Enter</b> next vowel</div>
 
 <script src="assets/_vowels.js"></script>
+<script src="_pack.js"></script>
+<script src="assets/_only.js"></script>
 <script>
+/* 학생 팩이 letters 를 적어뒀으면 그 글자만 남긴다. 없으면 전부 나온다. */
+var _vbAll = VOWELS_BASIC, _vcAll = VOWELS_COMPOUND;
+VOWELS_BASIC = ONLY(_vbAll, 'vowels');
+VOWELS_COMPOUND = ONLY(_vcAll, 'vowels');
+/* 한쪽이 비는 건 정상이다(합성모음을 아직 안 배웠을 때).
+   둘 다 비면 앱이 껍데기가 되므로 그때만 되돌린다. */
+if (!VOWELS_BASIC.length && !VOWELS_COMPOUND.length) { VOWELS_BASIC = _vbAll; VOWELS_COMPOUND = _vcAll; }
+
 var O='assets/img/obj/', V='assets/voice/';
 var ALL=VOWELS_BASIC.concat(VOWELS_COMPOUND);
 var A={};
