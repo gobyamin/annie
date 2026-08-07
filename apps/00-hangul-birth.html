@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Birth of Hangul</title>
+<style>
+:root{
+  --bg:#f7efdd; --card:#fffdf6; --ink:#221c14; --muted:#6b6353; --line:#221c14;
+  --blue:#1d5fa9; --orange:#d46508; --green:#2c7a57; --red:#bf3b2e;
+  --amber:#f7f1dc; --sh:4px 4px 0 var(--line);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{color:var(--ink);background-color:var(--bg);
+  background-image:radial-gradient(rgba(120,90,40,.05) 1px,transparent 1.3px),
+    radial-gradient(rgba(255,255,255,.5) 1.4px,transparent 1.6px);
+  background-size:26px 26px,34px 34px;
+  font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+  font-size:17px;line-height:1.45;display:flex;flex-direction:column;align-items:center;
+  padding:18px 14px 30px;min-height:100%}
+.kr{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;font-weight:800}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:5px;z-index:90;pointer-events:none;
+  background:repeating-linear-gradient(90deg,#a8524e 0 44px,#f3ecd9 44px 47px,#c9973f 47px 91px,
+   #f3ecd9 91px 94px,#41678f 94px 138px,#f3ecd9 138px 141px,#4f7d62 141px 185px,#f3ecd9 185px 188px,
+   #6f5590 188px 232px,#f3ecd9 232px 235px);opacity:.85}
+.wrap{width:100%;max-width:560px}
+.appbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-2px 0 12px;width:100%}
+.appbar a,.appbar button{font:inherit;font-weight:800;font-size:14px;text-decoration:none;
+  color:var(--muted);background:transparent;border:0;box-shadow:none;padding:7px 10px;
+  min-height:40px;display:inline-flex;align-items:center;gap:6px;border-radius:10px;cursor:pointer}
+.appbar a:hover,.appbar button:hover{background:rgba(0,0,0,.055);color:var(--ink)}
+.ab-home{border:2px solid var(--line)!important;color:var(--ink)!important;background:var(--card)!important;
+  box-shadow:2px 2px 0 var(--line)!important}
+.ab-home:active{transform:translate(2px,2px)!important;box-shadow:none!important}
+.ab-step{background:#a63a2e;color:#fbf3e4;font-size:12px;font-weight:800;letter-spacing:.1em;
+  padding:5px 9px;border-radius:7px;box-shadow:inset 0 0 0 2px rgba(251,243,228,.55);margin-left:2px}
+.ab-right{margin-left:auto;display:flex;gap:2px;align-items:center}
+.ab-arrow{font-size:19px;line-height:1;padding:7px 13px}
+.topbar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.seal{width:38px;height:38px;border-radius:9px;background:#a63a2e;color:#fbf3e4;display:flex;
+  align-items:center;justify-content:center;font-weight:800;font-size:13px;flex:0 0 auto;
+  box-shadow:inset 0 0 0 2.2px rgba(251,243,228,.55)}
+.title{font-weight:800;font-size:16px;line-height:1.2}
+.title small{display:block;color:var(--muted);font-weight:700;font-size:12.5px}
+.dots{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap;max-width:40%;justify-content:flex-end}
+.dot{width:7px;height:7px;border-radius:99px;background:#ddd2b6}
+.dot.on{background:var(--red)} .dot.done{background:#c2ab86}
+
+.stage{position:relative;width:100%;aspect-ratio:1/1;border:3px solid var(--line);border-radius:22px;
+  box-shadow:var(--sh);background:var(--card);overflow:hidden;cursor:pointer}
+.stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  transition:opacity .5s ease}
+.stage img.hide{opacity:0}
+.krtag{position:absolute;left:12px;top:12px;background:rgba(255,253,246,.9);border-radius:12px;
+  padding:6px 14px;font-size:26px;line-height:1;box-shadow:2px 2px 0 var(--line)}
+.krtag.long{font-size:16px;padding:8px 14px}
+
+.cap{margin-top:14px;background:var(--card);border:3px solid var(--line);border-radius:16px;
+  box-shadow:var(--sh);padding:16px 18px;min-height:98px}
+.cap .en{font-size:clamp(17px,3.8vw,20px);font-weight:800;line-height:1.35}
+.cap .sub{margin-top:6px;color:var(--muted);font-size:14.5px;font-weight:600;line-height:1.4}
+.cap .roman{margin-top:6px;color:var(--blue);font-size:13.5px;font-weight:800}
+
+.ctl{display:flex;gap:10px;margin-top:12px}
+button{font:inherit;font-weight:800;cursor:pointer;border:3px solid var(--line);background:var(--card);
+  color:var(--ink);border-radius:13px;padding:12px 16px;min-height:52px;box-shadow:2px 2px 0 var(--line)}
+button:active{transform:translate(2px,2px);box-shadow:none}
+#back{flex:0 0 auto}
+#next{flex:1;background:var(--orange);color:#fff;font-size:18px}
+#spk{flex:0 0 auto}
+.skip{margin-top:10px;text-align:center}
+.skip a{color:var(--muted);font-size:13px;font-weight:700;text-decoration:underline;cursor:pointer}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
+</style>
+<link rel="stylesheet" href="assets/_ui.css">
+</head>
+<body>
+<div class="wrap">
+
+<nav class="appbar">
+  <a class="ab-home" href="index.html">‹ All apps</a>
+  <span class="ab-step">INTRO</span>
+  <span class="ab-right">
+    <a class="ab-arrow" href="01-hangul-letter-lab.html" title="Next: Amin's Very Long Day" aria-label="Next">›</a>
+  </span>
+</nav>
+
+  <div class="topbar">
+    <div class="seal" id="seal">00</div>
+    <div class="title">The Birth of Hangul<small>how King Sejong really designed it</small></div>
+    <div class="dots" id="dots"></div>
+  </div>
+
+  <div class="stage" id="stage">
+    <img id="img" src="" alt="">
+    <div class="krtag kr" id="krtag" style="display:none"></div>
+  </div>
+
+  <div class="cap">
+    <div class="en" id="capEn"></div>
+    <div class="roman" id="capRoman" style="display:none"></div>
+    <div class="sub" id="capSub"></div>
+  </div>
+
+  <div class="ctl">
+    <button id="back">← Back</button>
+    <button id="next">Tap to continue →</button>
+    <button id="spk" title="Hear it">🔊</button>
+  </div>
+  <div class="skip"><a id="skip" href="01-hangul-letter-lab.html">Skip intro → open the letter lab</a></div>
+</div>
+
+<div class="keys"><b>Space</b> hear it again · <b>→</b> or <b>Enter</b> next · <b>←</b> back</div>
+
+<script src="assets/_sejong.js"></script>
+<script>
+var IMG='assets/img/sejong/', V='assets/voice/';
+var A={};
+SEJONG.forEach(function(s){ if(s.voice && !A[s.voice]){ var a=new Audio(V+s.voice+'.wav'); a.preload='auto'; A[s.voice]=a; } });
+var unlocked=false;
+function unlock(){ if(unlocked)return; unlocked=true;
+  for(var k in A){ (function(a){ try{ var p=a.play(); if(p&&p.then) p.then(function(){a.pause();a.currentTime=0;}).catch(function(){}); }catch(e){} })(A[k]); } }
+function play(id){ if(!id)return; var a=A[id]; if(!a)return;
+  for(var k in A) try{ A[k].pause(); A[k].currentTime=0; }catch(e){}
+  try{ a.currentTime=0; var p=a.play(); if(p&&p.catch) p.catch(function(){}); }catch(e){} }
+
+var i=0;
+function g(id){ return document.getElementById(id); }
+var img=g('img'), krtag=g('krtag'), dots=g('dots'), seal=g('seal');
+
+function render(){
+  var s=SEJONG[i];
+  /* 마지막 장면에 닿으면 끓낸 것. 이 화면엔 onward 가 없어 여기서 직접 남긴다 */
+  if(i===SEJONG.length-1 && window.Progress) Progress.done('00');
+  seal.textContent=(i+1<10?'0'+(i+1):''+(i+1));
+  dots.innerHTML='';
+  SEJONG.forEach(function(_,k){
+    var d=document.createElement('div');
+    d.className='dot'+(k===i?' on':(k<i?' done':''));
+    dots.appendChild(d);
+  });
+
+  var next=new Image(); next.src=IMG+s.id+'.webp';
+  img.className=''; img.src=IMG+s.id+'.webp';
+
+  if(s.kr){
+    krtag.style.display='block';
+    krtag.textContent=s.kr;
+    krtag.className='krtag kr'+(s.kr.length>4?' long':'');
+  } else krtag.style.display='none';
+
+  g('capEn').textContent=s.en;
+  g('capSub').textContent=s.sub||'';
+  var rm=g('capRoman');
+  if(s.krRoman){ rm.style.display='block'; rm.textContent=s.krRoman; } else rm.style.display='none';
+
+  g('back').style.visibility = i===0 ? 'hidden' : 'visible';
+  g('next').textContent = (i===SEJONG.length-1) ? "Let's go →" : 'Tap to continue →';
+  g('spk').style.visibility = s.voice ? 'visible' : 'hidden';
+
+  if(s.voice) setTimeout(function(){ play(s.voice); }, 260);
+}
+
+function go(d){
+  unlock();
+  var s=SEJONG[i];
+  if(d>0 && i===SEJONG.length-1 && s.next){ location.href=s.next; return; }
+  i=Math.max(0, Math.min(SEJONG.length-1, i+d));
+  render();
+}
+g('next').onclick=function(e){ e.stopPropagation(); go(1); };
+g('back').onclick=function(e){ e.stopPropagation(); go(-1); };
+g('spk').onclick=function(e){ e.stopPropagation(); play(SEJONG[i].voice); };
+g('stage').onclick=function(){ unlock(); go(1); };
+g('skip').onclick=function(){ location.href='01-hangul-letter-lab.html'; };
+document.addEventListener('keydown',function(e){
+  /* Space = 다시 듣기. 나머지 앱과 같은 규칙 */
+  if(e.key===' '){ e.preventDefault(); unlock(); g('spk').click(); return; }
+  if(e.key==='ArrowRight'||e.key==='Enter'){ e.preventDefault(); go(1); }
+  if(e.key==='ArrowLeft'){ go(-1); }
+});
+render();
+</script>
+
+<script src="assets/_progress.js"></script>
+<script>
+Progress.visit('00');
+/* 다음 화면으로 넘어가는 큰 링크를 누르면 그 화면을 끝낸 것으로 본다 */
+document.addEventListener('click',function(e){
+  var t=e.target; while(t&&t!==document){ if(t.classList&&t.classList.contains('onward')){ Progress.done('00'); break; } t=t.parentNode; }
+},true);
+</script>
+</body>
+</html>

@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Bottom of the Block</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-size:17px;padding:18px 14px 30px;max-width:620px;margin:0 auto}
+h1{font-size:clamp(19px,4.4vw,25px);margin:0;letter-spacing:-.02em}
+header{display:flex;align-items:center;gap:11px;margin-bottom:6px}
+.sub{color:var(--muted);font-size:14px;font-weight:700}
+.secthead{font-size:12.5px;font-weight:800;color:var(--muted);letter-spacing:.07em;margin:18px 0 7px}
+
+/* 블록 그림: 그림 파일 없이 CSS 로만. 받침 자리를 눈으로 보여주는 게 핵심 */
+.block{position:relative;width:100%;aspect-ratio:1/1;max-width:230px;margin:0 auto;
+  border:3px solid var(--line);border-radius:20px;background:var(--card);box-shadow:var(--sh);
+  display:grid;grid-template-rows:1fr auto;overflow:hidden}
+.block .top{display:flex;align-items:center;justify-content:center;font-size:clamp(52px,15vw,82px);
+  line-height:1;padding-top:6px}
+.block .bot{border-top:3px dashed var(--line);background:var(--amber);
+  display:flex;align-items:center;justify-content:center;gap:8px;padding:7px 6px;min-height:64px}
+.block .bot .bc{font-size:clamp(30px,8vw,44px);line-height:1;color:var(--red)}
+.block .bot .tag{font-size:11.5px;font-weight:800;color:var(--muted);letter-spacing:.08em}
+.block.nofinal .bot{background:var(--bg);opacity:.5}
+
+/* 일곱 소리 고르는 줄 */
+.seven{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:12px}
+.sv{border:3px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;
+  padding:8px 2px;text-align:center;box-shadow:var(--sh1);font:inherit;color:var(--ink)}
+.sv:active{transform:translate(2px,2px);box-shadow:none}
+.sv.on{background:var(--seal);color:var(--seal-ink);border-color:var(--line)}
+.sv .c{font-size:23px;line-height:1.1}
+.sv .r{font-size:10.5px;font-weight:800;opacity:.75}
+
+/* 이 소리로 무너지는 글자들 */
+.spells{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:11px}
+.sp{border:3px solid var(--line);border-radius:11px;background:var(--card);
+  min-width:46px;min-height:46px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.arrow{font-size:20px;font-weight:800;color:var(--muted);padding:0 2px}
+.becomes{border:3px solid var(--red);background:var(--bad);border-radius:11px;
+  min-width:46px;min-height:46px;display:flex;align-items:center;justify-content:center;
+  font-size:24px;color:var(--red)}
+
+.card{background:var(--card);border:3px solid var(--line);border-radius:16px;box-shadow:var(--sh);
+  padding:14px 16px;margin-top:12px}
+.card p{margin:0;font-size:15.5px;font-weight:600}
+.card .surprise{margin-top:9px;background:var(--blush);border:3px dashed var(--line);
+  border-radius:12px;padding:9px 12px;font-size:14px;font-weight:700}
+.wordrow{display:flex;align-items:center;gap:11px;margin-top:12px;flex-wrap:wrap}
+.wordrow .kw{font-size:30px;line-height:1}
+.wordrow .we{color:var(--muted);font-size:14px;font-weight:700}
+.wordrow .rom{color:var(--blue);font-size:13.5px;font-weight:800}
+
+/* 연음: 받침이 옆칸으로 넘어가는 장면 */
+.link{background:var(--card);border:3px solid var(--line);border-radius:16px;box-shadow:var(--sh);
+  padding:15px 16px;margin-top:10px}
+.linkrow{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;
+  font-size:clamp(28px,7.5vw,40px);line-height:1.15;min-height:56px}
+.linkrow .fall{color:var(--red);display:inline-block;transition:transform .5s cubic-bezier(.4,1.4,.5,1)}
+.linkrow.go .fall{transform:translateX(0.62em)}
+.linkrow .eq{font-size:.55em;color:var(--muted);font-weight:800;padding:0 4px}
+.linkrow .said{color:var(--green)}
+.link .why{color:var(--muted);font-size:14px;font-weight:700;margin-top:9px}
+.link .en{font-size:13px;font-weight:800;color:var(--muted);margin-top:2px}
+
+.acts{display:flex;gap:10px;margin-top:13px}
+.onward{display:block;margin-top:16px;text-align:center;background:var(--card);border:3px solid var(--line);
+  border-radius:15px;padding:14px;font-weight:800;text-decoration:none;color:var(--ink);box-shadow:var(--sh)}
+.onward small{display:block;color:var(--muted);font-weight:700;font-size:13px;margin-top:2px}
+.later{margin-top:14px;background:var(--paper2);border:3px dashed var(--line);border-radius:13px;
+  padding:11px 13px;font-size:13.5px;font-weight:700;color:var(--muted)}
+.keys{margin-top:13px;color:var(--muted);font-size:12.5px;font-weight:700;text-align:center}
+@media (max-width:380px){ .seven{grid-template-columns:repeat(4,1fr)} }
+</style>
+<link rel="stylesheet" href="assets/_ui.css">
+</head>
+<body>
+
+<nav class="appbar">
+  <a class="ab-home" href="index.html">‹ All apps</a>
+  <span class="ab-step">01 · BOTTOM</span>
+  <span class="ab-right">
+    <a class="ab-arrow" href="01e-letter-check.html" title="Previous: Letter Checkpoint" aria-label="Previous">‹</a>
+    <a class="ab-arrow" href="02-syllable-builder.html" title="Next: Syllable Builder" aria-label="Next">›</a>
+  </span>
+</nav>
+
+<header>
+  <div class="seal">받침</div>
+  <div>
+    <h1>The Bottom of the Block</h1>
+    <div class="sub">27 spellings down there. Only 7 sounds.</div>
+  </div>
+</header>
+
+<div class="secthead">TAP A SOUND</div>
+<div class="seven" id="seven"></div>
+
+<div class="block" id="block">
+  <div class="top kr" id="bTop">사</div>
+  <div class="bot"><span class="bc kr" id="bBot">ㄴ</span><span class="tag">BOTTOM</span></div>
+</div>
+
+<div class="spells" id="spells"></div>
+
+<div class="card">
+  <p id="desc"></p>
+  <div class="surprise" id="surprise" style="display:none"></div>
+  <div class="wordrow">
+    <span class="kw kr" id="kw"></span>
+    <span class="rom" id="rom"></span>
+    <span class="we" id="we"></span>
+    <span id="audioSlot"></span>
+  </div>
+</div>
+
+<div class="acts">
+  <button id="prev">← Back</button>
+  <button id="next">Next sound →</button>
+</div>
+
+<div class="secthead">AND THEN A VOWEL COMES ALONG</div>
+<div class="link">
+  <div class="linkrow" id="linkrow"></div>
+  <div class="why" id="linkWhy"></div>
+  <div class="en" id="linkEn"></div>
+  <div class="acts">
+    <button id="again">↻ Watch it again</button>
+    <button id="lnext">Next example →</button>
+  </div>
+</div>
+
+<div class="later" id="later"></div>
+
+<a class="onward" href="02-syllable-builder.html">Next → Build the blocks yourself
+  <small>You know the top, the middle and now the bottom. Time to assemble one.</small></a>
+
+<div class="keys"><b>1</b>–<b>7</b> picks a sound · <b>Space</b> replays · <b>Enter</b> next</div>
+
+<script src="assets/_batchim.js"></script>
+<script>
+var V='assets/voice/';
+function g(id){ return document.getElementById(id); }
+
+var A={};
+BATCHIM.forEach(function(b){ if(b.wav && !A[b.wav]){ var a=new Audio(V+b.wav+'.wav'); a.preload='auto'; A[b.wav]=a; } });
+var unlocked=false;
+function unlock(){ if(unlocked)return; unlocked=true;
+  for(var k in A){ (function(a){ try{ var p=a.play(); if(p&&p.then) p.then(function(){a.pause();a.currentTime=0;}).catch(function(){}); }catch(e){} })(A[k]); } }
+function play(id){ if(!id)return; var a=A[id]; if(!a)return;
+  for(var k in A) try{ A[k].pause(); A[k].currentTime=0; }catch(e){}
+  try{ a.currentTime=0; var p=a.play(); if(p&&p.catch) p.catch(function(){}); }catch(e){}
+}
+
+/* ── 일곱 소리 ─────────────────────────────────────────── */
+var i=0;
+var sevenEl=g('seven');
+BATCHIM.forEach(function(b,idx){
+  var t=document.createElement('button');
+  t.className='sv'; t.dataset.i=idx;
+  t.setAttribute('aria-label','Final sound '+b.ipa);
+  t.innerHTML='<div class="c kr">'+b.c+'</div><div class="r">'+b.ipa+'</div>';
+  t.onclick=function(){ unlock(); i=idx; render(); };
+  sevenEl.appendChild(t);
+});
+
+function render(){
+  var b=BATCHIM[i];
+  [].forEach.call(sevenEl.children,function(el,k){ el.className='sv'+(k===i?' on':''); });
+
+  /* 블록: 예시 낱글자를 위·아래로 쪼개서 보여준다 */
+  var blk=b.block;
+  g('bTop').textContent=blk.charAt(0);   /* 눈으로만 쪼갠다. 실제 분해는 02 가 한다 */
+  g('bBot').textContent=b.c;
+  /* 한 글자 통째로 보여주는 편이 정직하다: 위칸에 초성+중성을 같이 둔다 */
+  g('bTop').textContent=stripFinal(blk);
+
+  var sp=g('spells'); sp.innerHTML='';
+  b.spells.forEach(function(ch,k){
+    if(k) { var plus=document.createElement('span'); plus.className='arrow'; plus.textContent='·'; sp.appendChild(plus); }
+    var d=document.createElement('span'); d.className='sp kr'; d.textContent=ch; sp.appendChild(d);
+  });
+  var ar=document.createElement('span'); ar.className='arrow'; ar.textContent='→'; sp.appendChild(ar);
+  var bc=document.createElement('span'); bc.className='becomes kr'; bc.textContent=b.c; sp.appendChild(bc);
+
+  g('desc').textContent=b.say;
+  var s=g('surprise');
+  if(b.note){ s.style.display='block'; s.textContent=b.note; } else s.style.display='none';
+
+  g('kw').textContent=b.word;
+  g('rom').textContent=b.wordSay;
+  g('we').textContent=b.wordEn;
+
+  var slot=g('audioSlot'); slot.innerHTML='';
+  if(b.wav){
+    var btn=document.createElement('button');
+    btn.textContent='🔊'; btn.title='Hear the word';
+    btn.style.minHeight='44px'; btn.style.padding='8px 14px';
+    btn.onclick=function(){ unlock(); play(b.wav); };
+    slot.appendChild(btn);
+    setTimeout(function(){ play(b.wav); },220);
+  } else {
+    /* 비워둔다: 사용자 목소리로 채울 자리. 녹음 목록은 _녹음할것.md */
+  }
+}
+
+/* 낱글자에서 받침만 떼어낸 모양을 만든다 (한글 조합 공식) */
+function stripFinal(ch){
+  var code=ch.charCodeAt(0)-0xAC00;
+  if(code<0 || code>11171) return ch;
+  var f=code%28;
+  if(!f) return ch;
+  return String.fromCharCode(0xAC00+(code-f));
+}
+
+g('next').onclick=function(){ unlock(); i=(i+1)%BATCHIM.length; render(); };
+g('prev').onclick=function(){ unlock(); i=(i-1+BATCHIM.length)%BATCHIM.length; render(); };
+
+/* ── 연음 ──────────────────────────────────────────────── */
+var li=0;
+function renderLink(){
+  var x=LINKING[li], row=g('linkrow');
+  row.className='linkrow';
+  row.innerHTML='<span class="kr">'+x.w.charAt(0)+
+    '<span class="fall">'+x.tail+'</span></span>'+
+    '<span class="kr">'+x.w.slice(1)+'</span>'+
+    '<span class="eq">is said</span>'+
+    '<span class="kr said">'+x.say+'</span>';
+  g('linkWhy').textContent=x.why;
+  g('linkEn').textContent=x.en;
+  setTimeout(function(){ row.className='linkrow go'; },420);
+}
+g('again').onclick=function(){ renderLink(); };
+g('lnext').onclick=function(){ li=(li+1)%LINKING.length; renderLink(); };
+
+g('later').textContent=DOUBLE_NOTE;
+
+document.addEventListener('keydown',function(e){
+  var t=e.target||{};
+  if(t.tagName==='INPUT'||t.tagName==='TEXTAREA') return;
+  if(/^[1-7]$/.test(e.key)){ e.preventDefault(); unlock(); i=parseInt(e.key,10)-1; render(); return; }
+  if(e.key===' '){ e.preventDefault(); unlock(); var b=BATCHIM[i]; if(b.wav) play(b.wav); return; }
+  if(e.key==='ArrowRight'||e.key==='Enter'){ e.preventDefault(); g('next').click(); }
+  if(e.key==='ArrowLeft'){ g('prev').click(); }
+});
+
+render();
+renderLink();
+</script>
+<script src="assets/_progress.js"></script>
+<script>
+Progress.visit('01f');
+document.addEventListener('click',function(e){
+  var t=e.target; while(t&&t!==document){ if(t.classList&&t.classList.contains('onward')){ Progress.done('01f'); break; } t=t.parentNode; }
+},true);
+</script>
+</body>
+</html>

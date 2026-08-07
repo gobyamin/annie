@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Round 2 · How the sound is made</title>
+<style>
+:root{
+  --bg:#f7efdd; --card:#fffdf6; --ink:#221c14; --muted:#6b6353; --line:#221c14;
+  --blue:#1d5fa9; --orange:#d46508; --green:#2c7a57; --red:#bf3b2e; --purple:#6d3fae;
+  --amber:#f7f1dc; --sky:#eef2f7; --sh:4px 4px 0 var(--line);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{color:var(--ink);background-color:var(--bg);
+  background-image:radial-gradient(rgba(120,90,40,.05) 1px,transparent 1.3px),
+    radial-gradient(rgba(255,255,255,.5) 1.4px,transparent 1.6px);
+  background-size:26px 26px,34px 34px;
+  font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+  font-size:17px;line-height:1.45;padding:18px 14px 34px;max-width:620px;margin:0 auto}
+.kr{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;font-weight:800}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:5px;z-index:90;pointer-events:none;
+  background:repeating-linear-gradient(90deg,#a8524e 0 44px,#f3ecd9 44px 47px,#c9973f 47px 91px,
+   #f3ecd9 91px 94px,#41678f 94px 138px,#f3ecd9 138px 141px,#4f7d62 141px 185px,#f3ecd9 185px 188px,
+   #6f5590 188px 232px,#f3ecd9 232px 235px);opacity:.85}
+.appbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-2px 0 12px}
+.appbar a,.appbar button{font:inherit;font-weight:800;font-size:14px;text-decoration:none;
+  color:var(--muted);background:transparent;border:0;box-shadow:none;padding:7px 10px;
+  min-height:40px;display:inline-flex;align-items:center;gap:6px;border-radius:10px;cursor:pointer}
+.appbar a:hover,.appbar button:hover{background:rgba(0,0,0,.055);color:var(--ink)}
+.ab-home{border:2px solid var(--line)!important;color:var(--ink)!important;background:var(--card)!important;
+  box-shadow:2px 2px 0 var(--line)!important}
+.ab-home:active{transform:translate(2px,2px)!important;box-shadow:none!important}
+.ab-step{background:#a63a2e;color:#fbf3e4;font-size:12px;font-weight:800;letter-spacing:.1em;
+  padding:5px 9px;border-radius:7px;box-shadow:inset 0 0 0 2px rgba(251,243,228,.55);margin-left:2px}
+.ab-right{margin-left:auto;display:flex;gap:2px;align-items:center}
+.ab-arrow{font-size:19px;line-height:1;padding:7px 13px}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:4px}
+
+header{display:flex;align-items:center;gap:11px;margin-bottom:6px}
+.seal{width:40px;height:40px;border-radius:9px;background:#a63a2e;color:#fbf3e4;display:flex;
+  align-items:center;justify-content:center;font-weight:800;font-size:13px;flex:0 0 auto;
+  box-shadow:inset 0 0 0 2.2px rgba(251,243,228,.55)}
+h1{font-size:clamp(19px,4.4vw,25px);margin:0;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:14px;font-weight:700}
+.lead{background:var(--amber);border:3px solid var(--line);border-radius:14px;padding:11px 14px;
+  font-size:15px;font-weight:600;margin:12px 0 14px}
+.lead b{color:var(--red)}
+.zone{margin-bottom:9px}
+.zone .zh{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.06em;margin-bottom:5px}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+.pick{border:3px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;
+  min-width:52px;min-height:52px;font-size:26px;display:flex;align-items:center;justify-content:center;
+  box-shadow:2px 2px 0 var(--line);padding:0 6px}
+button.pick{padding:0;font:inherit}
+button.tri{font:inherit}
+.pick:active{transform:translate(2px,2px);box-shadow:none}
+.pick.on{background:#a63a2e;color:#fbf3e4}
+
+.stage{position:relative;border:3px solid var(--line);border-radius:20px;overflow:hidden;
+  box-shadow:var(--sh);background:var(--card);margin:14px 0 0}
+.stage img{width:100%;display:block}
+.stage svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.mk{fill:var(--red);opacity:.9;transition:cx .45s cubic-bezier(.3,.8,.35,1),cy .45s cubic-bezier(.3,.8,.35,1)}
+.mkring{fill:none;stroke:var(--red);stroke-width:2.4;transform-box:fill-box;transform-origin:center;
+  animation:pulse 1.6s ease-out infinite;transition:cx .45s,cy .45s}
+@keyframes pulse{0%{transform:scale(.55);opacity:.9}100%{transform:scale(1.7);opacity:0}}
+.air{stroke:var(--blue);fill:none;stroke-linecap:round;opacity:0}
+.air.go{animation:airflow 1.9s ease-in-out infinite}
+@keyframes airflow{0%,52%{opacity:0;stroke-dashoffset:26}64%{opacity:.95}88%{opacity:.95;stroke-dashoffset:0}100%{opacity:0;stroke-dashoffset:0}}
+.puff{stroke:var(--blue);fill:none;stroke-width:2.2;stroke-linecap:round;opacity:0}
+.puff.go{animation:puffout 1.9s ease-out infinite}
+@keyframes puffout{0%,58%{opacity:0;transform:translateX(0) scale(.6)}
+ 70%{opacity:.85}100%{opacity:0;transform:translateX(-26px) scale(1.5)}}
+.sqz{fill:none;stroke:var(--red);stroke-width:3;opacity:0;transform-box:fill-box;transform-origin:center}
+.sqz.go{opacity:.95;animation:squeeze 1.9s ease-in-out infinite}
+@keyframes squeeze{0%,55%,100%{transform:scaleY(1)}72%{transform:scaleY(.5)}}
+.pstrip{transform-box:fill-box;transform-origin:top center}
+.pstrip .sheet{fill:#ffffff;stroke:#b9ae97;stroke-width:.45}
+.pstrip .shade{fill:#e6e0d2;opacity:.85}
+.pstrip .line{stroke:#ded6c4;stroke-width:.3}
+.pclip{fill:#8d8676}
+.pstrip.nudge{animation:pnudge 1.9s ease-in-out infinite}
+.pstrip.blow{animation:pblow 1.9s ease-in-out infinite}
+.pstrip.flutter{animation:pflut 1.9s ease-in-out infinite}
+@keyframes pnudge{0%,62%,100%{transform:rotate(0)}74%{transform:rotate(11deg)}86%{transform:rotate(4deg)}}
+@keyframes pblow{0%,58%,100%{transform:rotate(0)}70%{transform:rotate(-64deg)}84%{transform:rotate(-33deg)}}
+@keyframes pflut{0%,58%,100%{transform:rotate(0)}66%{transform:rotate(-13deg)}74%{transform:rotate(-6deg)}82%{transform:rotate(-11deg)}90%{transform:rotate(-4deg)}}
+.plabel{font:800 11px "Segoe UI",sans-serif;fill:var(--muted)}
+.bigletter{position:absolute;left:12px;top:10px;font-size:52px;line-height:1;color:var(--ink);
+  background:rgba(255,253,246,.86);border-radius:12px;padding:2px 13px}
+.soundtag{position:absolute;right:12px;top:14px;background:var(--red);color:#fbf3e4;border-radius:11px;
+  padding:5px 13px;font-size:23px;font-weight:800;box-shadow:inset 0 0 0 2.2px rgba(251,243,228,.5)}
+
+.card{background:var(--card);border:3px solid var(--line);border-radius:16px;box-shadow:var(--sh);
+  padding:14px 16px;margin-top:12px}
+.card h3{margin:0 0 4px;font-size:16px}
+.card h3 small{font-weight:700;color:var(--muted);font-size:13px;margin-left:6px}
+.card p{margin:0;font-size:15.5px;font-weight:600}
+.airline{margin-top:10px;background:var(--sky);border:3px solid var(--line);border-radius:13px;
+  padding:10px 13px;font-size:15px;font-weight:600}
+.airline b{color:var(--ink)}
+.note{margin-top:10px;background:#f7ece7;border:3px dashed var(--line);border-radius:13px;
+  padding:10px 13px;font-size:14.5px;font-weight:700}
+.trio{margin-top:12px;background:var(--card);border:3px solid var(--line);border-radius:16px;
+  box-shadow:var(--sh);padding:13px 15px}
+.trio h3{margin:0 0 8px;font-size:15px;color:var(--muted);letter-spacing:.04em}
+.tri{flex:1;border:3px solid var(--line);border-radius:13px;background:var(--card);cursor:pointer;
+  padding:9px 4px;text-align:center;box-shadow:2px 2px 0 var(--line)}
+.tri:active{transform:translate(2px,2px);box-shadow:none}
+.tri.on{background:var(--amber)}
+.tri .c{font-size:31px;line-height:1.1}
+.tri .s{font-size:15px;font-weight:800;color:var(--red)}
+.tri .t{font-size:11px;font-weight:800;color:var(--muted)}
+.trionly{color:var(--muted);font-size:14.5px;font-weight:700}
+.acts{display:flex;gap:10px;margin-top:13px}
+button{font:inherit;font-weight:800;cursor:pointer;border:3px solid var(--line);background:var(--card);
+  color:var(--ink);border-radius:13px;padding:12px 16px;min-height:52px;box-shadow:2px 2px 0 var(--line)}
+button:active{transform:translate(2px,2px);box-shadow:none}
+#say{flex:1;background:var(--orange);color:#fff;font-size:17px}
+#name{flex:0 0 auto;font-size:14px}
+.onward{display:block;margin-top:16px;text-align:center;background:var(--card);border:3px solid var(--line);
+  border-radius:15px;padding:14px;font-weight:800;text-decoration:none;color:var(--ink);box-shadow:var(--sh)}
+.onward small{display:block;color:var(--muted);font-weight:700;font-size:13px;margin-top:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
+</style>
+<link rel="stylesheet" href="assets/_ui.css">
+</head>
+<body>
+
+<nav class="appbar">
+  <a class="ab-home" href="index.html">‹ All apps</a>
+  <span class="ab-step">01 · SOUNDS</span>
+  <span class="ab-right">
+    <a class="ab-arrow" href="01-hangul-letter-lab.html" title="Previous: Amin's journey" aria-label="Previous">‹</a>
+    <a class="ab-arrow" href="01c-tense-chant.html" title="Next: The tense-consonant chant" aria-label="Next">›</a>
+  </span>
+</nav>
+
+<header>
+  <div class="seal">2바퀴</div>
+  <div>
+    <h1>How the sound is made</h1>
+    <div class="sub">Round 2 · the same letters, from the inside</div>
+  </div>
+</header>
+
+<div class="lead">
+  In round one these letters were <b>shapes</b>: a gun, a nose, a door.<br>
+  Now watch your mouth. Letters that looked unrelated turn out to be
+  <b>the same mouth position with more or less air</b>.
+</div>
+
+<div id="picker"></div>
+
+<div class="stage">
+  <img id="mouth" src="assets/img/art/mouth-side.webp" alt="side view of the mouth">
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none" id="ov"></svg>
+  <div class="bigletter kr" id="bigLetter">ㄱ</div>
+  <div class="soundtag kr" id="soundTag">그</div>
+</div>
+
+<div class="card">
+  <h3 id="placeEn">The back of the mouth<small class="kr" id="placeKr">여린입천장</small></h3>
+  <p id="placeTip"></p>
+  <div class="airline" id="airline"></div>
+  <div class="note" id="note" style="display:none"></div>
+</div>
+
+<div class="trio">
+  <h3 id="trioHead">SAME PLACE, DIFFERENT AIR</h3>
+  <div class="row" id="trioRow"></div>
+</div>
+
+<div class="acts">
+  <button id="say">🔊 Hear the sound</button>
+  <button id="name">Its name</button>
+  <button id="next">Next letter →</button>
+</div>
+
+<a class="onward" href="01c-tense-chant.html">Continue → The tense-consonant chant<small>바닷속 조개 → 빠따쏙쪼깨</small></a>
+
+<div class="keys"><b>Space</b> play the sound · <b>→</b> or <b>Enter</b> next letter</div>
+
+<script src="assets/_articulation.js"></script>
+<script>
+var V='assets/voice/';
+var ZONES=[['lips','LIPS'],['ridge','BEHIND THE TEETH'],['palate','ROOF OF THE MOUTH'],
+           ['velar','BACK OF THE MOUTH'],['throat','THROAT']];
+var A={};
+ARTIC.forEach(function(x){ [x.sound,x.name].forEach(function(id){
+  if(id && !A[id]){ var a=new Audio(V+id+'.wav'); a.preload='auto'; A[id]=a; } }); });
+function play(id){ if(!id) return; var a=A[id]; if(!a) return;
+  for(var k in A){ try{ A[k].pause(); A[k].currentTime=0; }catch(e){} }
+  try{ a.currentTime=0; var p=a.play(); if(p&&p.catch) p.catch(function(){}); }catch(e){} }
+function byChar(c){ for(var i=0;i<ARTIC.length;i++) if(ARTIC[i].c===c) return ARTIC[i]; return null; }
+function g(id){ return document.getElementById(id); }
+var SAY={g:'그',n:'느',d:'드',r:'르',m:'므',b:'브',s:'스',ng:'응',j:'즈',ch:'츠',
+         k:'크',t:'트',p:'프',h:'흐',kk:'끄',tt:'뜨',pp:'쁘',ss:'쓰',jj:'쯔'};
+function sayOf(x){ return SAY[(x.sound||'').replace('sound-','')] || ''; }
+
+var cur=byChar('ㄱ');
+
+var picker=g('picker');
+ZONES.forEach(function(z){
+  var items=ARTIC.filter(function(x){ return x.place===z[0]; });
+  var box=document.createElement('div'); box.className='zone';
+  box.innerHTML='<div class="zh">'+z[1]+'</div>';
+  var row=document.createElement('div'); row.className='row';
+  items.forEach(function(x){
+    var b=document.createElement('button');
+    b.className='pick kr'; b.textContent=x.c; b.dataset.c=x.c;
+    b.onclick=function(){ cur=x; render(); play(x.sound); };
+    row.appendChild(b);
+  });
+  box.appendChild(row); picker.appendChild(box);
+});
+
+function drawOverlay(){
+  var p=PLACES[cur.place], f=FLOW[cur.air];
+  var s='';
+  if(f.arrow==='short')
+    s+='<path class="air go" d="M'+(p.x-4)+','+p.y+' L'+(p.x-13)+','+(p.y+1)+'" stroke-width="3" stroke-dasharray="26"/>';
+  if(f.arrow==='long')
+    s+='<path class="air go" d="M'+(p.x-4)+','+p.y+' L'+(p.x-30)+','+(p.y+2)+'" stroke-width="4.2" stroke-dasharray="34"/>';
+  if(f.arrow==='stream')
+    s+='<path class="air go" d="M'+(p.x-4)+','+p.y+' L'+(p.x-24)+','+(p.y+1)+'" stroke-width="2.6" stroke-dasharray="4 3"/>';
+  if(f.arrow==='flick')
+    s+='<path class="air go" d="M'+(p.x-3)+','+p.y+' q-7,-6 -13,1" stroke-width="3" stroke-dasharray="20"/>';
+  if(f.arrow==='nose')
+    s+='<path class="air go" d="M'+(p.x-2)+','+(p.y-3)+' q-6,-14 -14,-16" stroke-width="3" stroke-dasharray="26"/>';
+  for(var i=0;i<f.puffs;i++)
+    s+='<path class="puff go" style="animation-delay:'+(i*.11)+'s" d="M'+(p.x-14-i*6)+','+(p.y-5)+
+       ' q-4,5 0,10" />';
+  if(f.squeeze)
+    s+='<ellipse class="sqz go" cx="'+p.x+'" cy="'+p.y+'" rx="7" ry="9"/>';
+  s+='<circle class="mkring" cx="'+p.x+'" cy="'+p.y+'" r="5"/>';
+  s+='<circle class="mk" cx="'+p.x+'" cy="'+p.y+'" r="2.6"/>';
+  var cls='pstrip'+(f.paper==='still'?'':' '+f.paper);
+  s+='<g class="'+cls+'">'+
+     '<path class="shade" d="M6.2,56.4 h3.4 v15.4 q-1.7,.7 -3.4,0 z" transform="translate(.5 .5)"/>'+
+     '<path class="sheet" d="M6.2,56.4 h3.4 v15.4 q-1.7,.7 -3.4,0 z"/>'+
+     '<path class="line" d="M6.9,59.4 h2"/><path class="line" d="M6.9,62.4 h2"/>'+
+     '<path class="line" d="M6.9,65.4 h2"/><path class="line" d="M6.9,68.4 h2"/>'+
+     '<rect class="pclip" x="6.5" y="55.6" width="2.8" height="1.1" rx=".4"/>'+
+     '</g>';
+  s+='<text class="plabel" x="3" y="79">paper</text>';
+  g('ov').innerHTML=s;
+}
+
+function render(){
+  var p=PLACES[cur.place], air=AIRS[cur.air], f=FLOW[cur.air];
+  [].forEach.call(document.querySelectorAll('.pick'),function(b){
+    b.className='pick kr'+(b.dataset.c===cur.c?' on':''); });
+
+  g('bigLetter').textContent=cur.c;
+  g('soundTag').textContent=sayOf(cur);
+  drawOverlay();
+
+  g('placeEn').firstChild.nodeValue=p.en+' ';
+  g('placeKr').textContent=p.kr;
+  g('placeTip').textContent=p.tip;
+  g('airline').innerHTML='<b>'+air.en+' · <span class="kr">'+air.kr+'</span></b>. '+air.tip+
+    '<br><span style="color:var(--muted)">'+air.paper+'</span>';
+
+  var note=g('note');
+  if(cur.note){ note.style.display='block'; note.textContent='⚠️ '+cur.note; }
+  else note.style.display='none';
+
+  var row=g('trioRow'); row.innerHTML='';
+  if(cur.same.length<2){
+    g('trioHead').textContent='ON ITS OWN';
+    row.innerHTML='<div class="trionly">'+cur.c+' has no plain / aspirated / tense partners. It is '+
+      air.en.toLowerCase()+'.</div>';
+    return;
+  }
+  g('trioHead').textContent='SAME PLACE, DIFFERENT AIR';
+  cur.same.forEach(function(c){
+    var x=byChar(c); if(!x) return;
+    var d=document.createElement('button');
+    d.className='tri'+(c===cur.c?' on':'');
+    d.innerHTML='<div class="c kr">'+c+'</div><div class="s kr">'+sayOf(x)+'</div>'+
+                '<div class="t">'+AIRS[x.air].en+'</div>';
+    d.onclick=function(){ cur=x; render(); play(x.sound); };
+    row.appendChild(d);
+  });
+}
+
+g('say').onclick=function(){ play(cur.sound); };
+g('name').onclick=function(){ play(cur.name); };
+g('next').onclick=function(){
+  var i=ARTIC.indexOf(cur); cur=ARTIC[(i+1)%ARTIC.length]; render(); play(cur.sound);
+};
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight'||e.key==='Enter'){ e.preventDefault(); g('next').click(); }
+  if(e.key===' '){ e.preventDefault(); play(cur.sound); }
+});
+render();
+</script>
+
+<script src="assets/_progress.js"></script>
+<script>
+Progress.visit('01b');
+/* 다음 화면으로 넘어가는 큰 링크를 누르면 그 화면을 끝낸 것으로 본다 */
+document.addEventListener('click',function(e){
+  var t=e.target; while(t&&t!==document){ if(t.classList&&t.classList.contains('onward')){ Progress.done('01b'); break; } t=t.parentNode; }
+},true);
+</script>
+</body>
+</html>

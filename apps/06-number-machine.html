@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Number Machine</title>
+<style>
+:root{
+  /* hanji paper and meok ink */
+  --bg:#f7efdd; --card:#fffdf6; --ink:#221c14; --muted:#6b6353; --line:#221c14;
+  /* obangsaek-leaning accents: 청 홍 황 녹 자 */
+  --blue:#1d5fa9; --orange:#d46508; --green:#2c7a57; --red:#bf3b2e; --purple:#6d3fae;
+  /* tinted hanji surfaces */
+  --sky:#eef2f7; --mint:#edf2ec; --blush:#f7ece7; --amber:#f7f1dc; --paper2:#fbf7ec;
+  --hair:#ded2b8;
+  /* depth */
+  --sh:4px 4px 0 var(--line); --sh1:2px 2px 0 var(--line);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  font-size:17px;line-height:1.45;padding:18px 14px 30px;max-width:1000px;margin:0 auto}
+.kr{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;font-weight:800;word-break:keep-all}
+h1{font-size:clamp(20px,4.4vw,30px);margin:0;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:14px;margin-top:2px}
+header{margin-bottom:10px}
+button{font:inherit;font-weight:700;cursor:pointer;border:3px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:12px;padding:10px 14px;min-height:46px;box-shadow:2px 2px 0 var(--line);transition:transform .06s,box-shadow .06s}
+button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--line)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.chips button{border-radius:999px;padding:9px 15px;min-height:44px;font-size:15px}
+.chips button.on{background:var(--purple);color:#fff}
+.card{background:var(--card);border:3px solid var(--line);border-radius:24px;box-shadow:var(--sh);
+  padding:22px 18px;text-align:center}
+.kind{font-size:14px;font-weight:800;color:var(--muted);letter-spacing:.08em}
+.target{font-size:clamp(52px,15vw,120px);line-height:1.05;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.tsub{color:var(--muted);font-weight:800;font-size:clamp(15px,3.2vw,19px)}
+.ans{display:none;margin-top:16px;border-top:4px dashed var(--line);padding-top:16px}
+.card.open .ans{display:block}
+.card.open .prompt{display:none}
+.prompt{color:var(--muted);font-weight:700;margin-top:14px;font-size:clamp(15px,3vw,18px)}
+.kans{font-size:clamp(34px,8.5vw,64px);line-height:1.15}
+.rans{font-size:clamp(16px,3.6vw,22px);font-weight:800;color:var(--blue);letter-spacing:.02em;margin-top:4px}
+.why{margin-top:12px;font-size:clamp(15px,3.1vw,18px);background:#fffdf6;border:3px dashed var(--line);
+  border-radius:14px;padding:11px 14px;text-align:left}
+.why b{color:var(--red)}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.acts button{flex:1 1 160px;font-size:17px}
+#reveal{background:var(--orange)}
+.mini{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+.mini button{min-height:44px;font-size:15px;padding:9px 13px}
+.ref{margin-top:18px;background:var(--card);border:3px solid var(--line);border-radius:20px;box-shadow:var(--sh);padding:16px}
+.ref h3{margin:0 0 8px;font-size:17px}
+table{width:100%;border-collapse:collapse;font-size:clamp(14px,3vw,17px)}
+th,td{padding:7px 6px;text-align:center;border-bottom:2px solid #e6e0d2}
+th{font-size:13px;color:var(--muted);letter-spacing:.05em}
+td.n{font-weight:800;font-variant-numeric:tabular-nums}
+.use{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:620px){.use{grid-template-columns:1fr}}
+.usebox{border:3px solid var(--line);border-radius:14px;padding:12px 14px}
+.usebox.s{background:#eef3ff}
+.usebox.n{background:#fff2e6}
+.usebox h4{margin:0 0 6px;font-size:16px}
+.usebox ul{margin:0;padding-left:18px;font-size:15px}
+.warn{display:none;background:#ffe8e8;border:3px solid var(--red);border-radius:14px;padding:10px 14px;font-weight:700;margin-bottom:12px;font-size:15px}
+body.no-voice .warn{display:block}
+.foot{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
+kbd{background:var(--card);border:2px solid var(--line);border-bottom-width:3px;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:800}
+.hook{margin-top:10px;padding:10px 13px;border:3px solid var(--line);border-radius:12px;background:var(--mint);font-size:clamp(14px,3vw,17px)}
+.hook b{color:var(--green)}
+details summary{cursor:pointer;font-weight:800;font-size:17px;padding:4px 0}
+details[open] summary{margin-bottom:10px}
+.hookgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:680px){.hookgrid{grid-template-columns:1fr}}
+.hookgrid h4{margin:0 0 6px;font-size:15px}
+.hookgrid ol{margin:0;padding-left:20px;font-size:14.5px}
+.hookgrid li{margin:5px 0}
+.hookgrid b{color:var(--green)}
+.hooksrc{margin-top:10px;font-size:12.5px;color:var(--muted);font-weight:700}
+/* --- drill artwork: clock and money --- */
+.drillart{width:clamp(96px,22vw,132px);height:auto;display:block;margin:8px auto 0}
+.cface{fill:var(--paper2);stroke:var(--line);stroke-width:4}
+.ctick{stroke:var(--line);stroke-width:2.5;stroke-linecap:round}
+.chand{stroke-linecap:round}
+.chand.hour{stroke:var(--purple);stroke-width:7}
+.chand.min{stroke:var(--blue);stroke-width:4.5}
+.cpin{fill:var(--line)}
+.artkey{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;font-size:13px;font-weight:800;margin-top:6px}
+.artkey .k1{color:var(--purple)} .artkey .k2{color:var(--blue)}
+.moneyrow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px auto 0;max-width:460px}
+.note{display:inline-flex;align-items:center;gap:4px;border:2.5px solid var(--line);border-radius:6px;
+  padding:5px 9px;font-size:14px;font-weight:800;box-shadow:2px 2px 0 var(--line)}
+.note i{font-style:normal;font-size:11px;opacity:.75}
+.n5{background:#ffe9a8}.n1{background:#d9f0d0}.n05{background:#ffd9c4}.n01{background:#d3e5ff}
+.countrow{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:10px auto 0;max-width:420px;font-size:clamp(26px,6vw,38px);line-height:1.1}
+.coin{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;
+  border:2.5px solid var(--line);background:#efe9da;font-size:11px;font-weight:800;box-shadow:2px 2px 0 var(--line)}
+/* --- shared chrome: nav bar, focus, motion, pack loader --- */
+.appbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-2px 0 14px}
+.appbar a,.appbar button{font:inherit;font-weight:800;font-size:14px;text-decoration:none;
+  color:var(--muted);background:transparent;border:0;box-shadow:none;padding:7px 10px;
+  min-height:40px;display:inline-flex;align-items:center;gap:6px;border-radius:10px;cursor:pointer;transition:none}
+.appbar a:hover,.appbar button:hover{background:rgba(0,0,0,.055);color:var(--ink)}
+.appbar a:active,.appbar button:active{transform:none;box-shadow:none}
+.ab-home{border:2px solid var(--line)!important;color:var(--ink)!important;background:var(--card)!important;
+  box-shadow:2px 2px 0 var(--line)!important}
+.ab-home:active{transform:translate(2px,2px)!important;box-shadow:none!important}
+.ab-step{background:#a63a2e;color:#fbf3e4;font-size:12px;font-weight:800;letter-spacing:.12em;
+  padding:5px 9px;border-radius:7px;box-shadow:inset 0 0 0 2px rgba(251,243,228,.55);margin-left:2px}
+.ab-right{margin-left:auto;display:flex;gap:2px;align-items:center}
+.ab-arrow{font-size:19px;line-height:1;padding:7px 13px}
+.ab-arrow[aria-disabled="true"]{opacity:.25;pointer-events:none}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:4px}
+@keyframes pop{0%{transform:scale(.94)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
+.pop{animation:pop .22s ease-out}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+#abov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(18,18,24,.55);z-index:70;
+  display:none;align-items:center;justify-content:center;padding:14px}
+#abov.on{display:flex}
+#abbox label{display:block;font-weight:800;font-size:14px;margin:14px 0 6px}
+#abbox select,#abbox input[type=range]{width:100%;font:inherit;font-weight:700;
+  border:3px solid var(--line);border-radius:12px;padding:10px;background:var(--card);min-height:46px}
+#abbox input[type=range]{padding:0;height:46px}
+.abhint{font-size:14px;color:var(--muted);margin-top:6px}
+/* --- hanji paper + saekdong band --- */
+body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(rgba(120,90,40,.055) 1px,transparent 1.3px),
+    radial-gradient(rgba(120,90,40,.04) 1px,transparent 1.3px),
+    radial-gradient(rgba(255,255,255,.5) 1.4px,transparent 1.6px);
+  background-size:26px 26px,42px 42px,34px 34px;
+  background-position:0 0,13px 21px,7px 3px;
+}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:5px;z-index:90;pointer-events:none;
+  background:repeating-linear-gradient(90deg,
+    #a8524e 0 44px,#f3ecd9 44px 47px,
+    #c9973f 47px 91px,#f3ecd9 91px 94px,
+    #41678f 94px 138px,#f3ecd9 138px 141px,
+    #4f7d62 141px 185px,#f3ecd9 185px 188px,
+    #6f5590 188px 232px,#f3ecd9 232px 235px);
+  opacity:.85}
+header{display:flex;flex-wrap:wrap;gap:11px;align-items:flex-start}
+</style>
+<link rel="stylesheet" href="assets/_ui.css">
+</head>
+<body>
+
+<nav class="appbar">
+  <a class="ab-home" href="index.html">‹ All apps</a>
+  <span class="ab-step">06 / 10</span>
+  <span class="ab-right">
+    <a class="ab-arrow" href="05-picture-match.html" title="Previous app" aria-label="Previous app">‹</a>
+    <a class="ab-arrow" href="07-survival-korean.html" title="Next app" aria-label="Next app">›</a>
+    <button id="abSet" title="Voice settings" aria-label="Voice settings">🔊</button>
+  </span>
+</nav>
+
+<div class="warn">🔇 No Korean voice on this device: the 🔊 buttons will be silent. The teacher can read the numbers aloud instead.</div>
+
+<header>
+  <div class="seal">06</div>
+  <div>
+  <h1>Number Machine</h1>
+  <div class="sub">Korean has <b>two</b> number systems. This machine drills both, and tells you which one to use.</div>
+  </div>
+</header>
+
+<div class="chips" id="kinds"></div>
+
+<div class="card" id="card"></div>
+
+<div class="ref">
+  <h3>📋 Cheat sheet</h3>
+  <table>
+    <tr><th>#</th><th>Sino <span class="kr">한자어</span></th><th>Native <span class="kr">고유어</span></th>
+        <th>#</th><th>Sino</th><th>Native</th></tr>
+    <tr><td class="n">1</td><td class="kr">일 <small>il</small></td><td class="kr">하나 (한)</td>
+        <td class="n">6</td><td class="kr">육 <small>yuk</small></td><td class="kr">여섯</td></tr>
+    <tr><td class="n">2</td><td class="kr">이 <small>i</small></td><td class="kr">둘 (두)</td>
+        <td class="n">7</td><td class="kr">칠 <small>chil</small></td><td class="kr">일곱</td></tr>
+    <tr><td class="n">3</td><td class="kr">삼 <small>sam</small></td><td class="kr">셋 (세)</td>
+        <td class="n">8</td><td class="kr">팔 <small>pal</small></td><td class="kr">여덟</td></tr>
+    <tr><td class="n">4</td><td class="kr">사 <small>sa</small></td><td class="kr">넷 (네)</td>
+        <td class="n">9</td><td class="kr">구 <small>gu</small></td><td class="kr">아홉</td></tr>
+    <tr><td class="n">5</td><td class="kr">오 <small>o</small></td><td class="kr">다섯</td>
+        <td class="n">10</td><td class="kr">십 <small>sip</small></td><td class="kr">열</td></tr>
+  </table>
+  <div class="use">
+    <div class="usebox s"><h4>Use <span class="kr">Sino 일 이 삼</span> for…</h4>
+      <ul><li>Money · <span class="kr">원</span></li><li>Minutes · <span class="kr">분</span></li>
+      <li>Months &amp; days · <span class="kr">월 · 일</span></li><li>Phone numbers</li>
+      <li>Floors · <span class="kr">층</span></li><li>Anything over 100</li></ul></div>
+    <div class="usebox n"><h4>Use <span class="kr">Native 하나 둘 셋</span> for…</h4>
+      <ul><li>The hour · <span class="kr">시</span></li><li>Age · <span class="kr">살</span></li>
+      <li>Counting things · <span class="kr">개 · 명 · 잔 · 병 · 마리</span></li>
+      <li>Only up to 99: after that, Sino</li></ul></div>
+  </div>
+  <div class="why" style="margin-top:14px">⏰ <b>Watch out:</b> a clock time uses <b>both</b> at once:
+    <span class="kr">3시 40분</span> = <span class="kr">세 시 사십 분</span>. Native for the hour, Sino for the minutes.</div>
+</div>
+
+<div class="ref">
+  <details>
+    <summary>🧠 Memory tricks 1–10 · sound-alikes that stick</summary>
+    <div class="hookgrid">
+      <div><h4>Native <span class="kr">하나 둘 셋</span></h4><ol id="hkN"></ol></div>
+      <div><h4>Sino <span class="kr">일 이 삼</span></h4><ol id="hkS"></ol></div>
+    </div>
+    <div class="hooksrc">Compiled from the mnemonic sets teachers already use: 90 Day Korean, Fluent in 3 Months, and Ryan Estrada’s reading comic.</div>
+  </details>
+</div>
+
+<div class="foot"><kbd>Space</kbd> reveal &nbsp;·&nbsp; <kbd>Enter</kbd> next &nbsp;·&nbsp; <kbd>S</kbd> say it again</div>
+
+<script src="_pack.js"></script>
+<script>
+var PACK=(function(){
+  var d=(window.STUDENT_PACK&&typeof window.STUDENT_PACK==='object')?window.STUDENT_PACK:null;
+  function val(k){var v=d&&d[k];if(v==null)return null;if(Array.isArray(v)&&!v.length)return null;return v;}
+  return{data:d,src:d?(d.student||'pack'):'',live:!!d,
+    get:function(k,fb){var v=val(k);return v===null?fb:v;},
+    has:function(k){return val(k)!==null;}};
+})();
+var TTS=(function(){
+  var voices=[], voice=null, pref=null, mult=1;
+  try{var s=JSON.parse(localStorage.getItem('ktts')||'{}');pref=s.voice||null;mult=+s.rate||1;}catch(e){}
+  function save(){try{localStorage.setItem('ktts',JSON.stringify({voice:pref,rate:mult}));}catch(e){}}
+  function korean(){return voices.filter(function(v){return /^ko/i.test(v.lang||'')||/korean|한국/i.test(v.name||'');});}
+  function pick(){
+    voices=(window.speechSynthesis&&speechSynthesis.getVoices())||[];
+    var ks=korean(); voice=null;
+    if(pref) for(var i=0;i<ks.length;i++) if(ks[i].name===pref) voice=ks[i];
+    if(!voice) voice=ks[0]||null;
+    document.body.classList.toggle('no-voice',!voice);
+    if(window.__voicesChanged) window.__voicesChanged(ks,voice);
+  }
+  if(window.speechSynthesis){pick();speechSynthesis.onvoiceschanged=pick;setTimeout(pick,600);}
+  else document.body.classList.add('no-voice');
+  function utt(t,r){
+    var u=new SpeechSynthesisUtterance(t);
+    u.lang='ko-KR'; u.rate=Math.max(.1,Math.min(2,(r||0.82)*mult));
+    if(voice)u.voice=voice; return u;
+  }
+  return {
+    say:function(t,r){if(!window.speechSynthesis||!t)return;
+      try{speechSynthesis.cancel();}catch(e){} speechSynthesis.speak(utt(t,r));},
+    queue:function(list,r){if(!window.speechSynthesis||!list||!list.length)return;
+      try{speechSynthesis.cancel();}catch(e){} list.forEach(function(t){speechSynthesis.speak(utt(t,r));});},
+    voices:korean, current:function(){return voice;},
+    setVoice:function(n){pref=n;pick();save();},
+    rate:function(x){if(x!=null){mult=x;save();} return mult;}
+  };
+})();
+
+/* --- sound-by-sound romanizer --- */
+var Lr=['g','kk','n','d','tt','r','m','b','pp','s','ss','','j','jj','ch','k','t','p','h'];
+var Vr=['a','ae','ya','yae','eo','e','yeo','ye','o','wa','wae','oe','yo','u','wo','we','wi','yu','eu','ui','i'];
+var Tr=['','k','k','k','n','n','n','t','l','k','m','p','l','t','t','p','m','p','p','t','t','ng','t','t','k','t','p','t'];
+function rom(s){
+  var out=[],cur=[];
+  for(var i=0;i<s.length;i++){
+    var c=s.charCodeAt(i)-0xAC00;
+    if(c>=0&&c<=11171) cur.push(Lr[Math.floor(c/588)]+Vr[Math.floor((c%588)/28)]+Tr[c%28]);
+    else { if(cur.length){out.push(cur.join('-'));cur=[];} if(s[i]!==' ')out.push(s[i]); }
+  }
+  if(cur.length) out.push(cur.join('-'));
+  return out.join(' ');
+}
+
+/* --- number → Korean --- */
+var SD=['','일','이','삼','사','오','육','칠','팔','구'];
+function sino4(n){
+  var u=['천','백','십',''], d=[Math.floor(n/1000)%10,Math.floor(n/100)%10,Math.floor(n/10)%10,n%10], s='';
+  for(var i=0;i<4;i++){ if(!d[i])continue; s+=((d[i]===1&&i<3)?'':SD[d[i]])+u[i]; }
+  return s;
+}
+function sino(n){
+  if(n===0) return '영';
+  var s='', eok=Math.floor(n/100000000); n%=100000000;
+  var man=Math.floor(n/10000); n%=10000;
+  if(eok) s+=sino4(eok)+'억';
+  if(man) s+=(man===1?'':sino4(man))+'만';
+  if(n) s+=sino4(n);
+  return s;
+}
+var NT=['','열','스물','서른','마흔','쉰','예순','일흔','여든','아흔'];
+var NO=['','하나','둘','셋','넷','다섯','여섯','일곱','여덟','아홉'];
+var NA={'하나':'한','둘':'두','셋':'세','넷':'네'};
+function nativeN(n,attr){
+  if(n<1||n>99) return null;
+  var t=Math.floor(n/10), o=n%10, s=NT[t], oo=NO[o];
+  if(attr&&n===20) s='스무';
+  if(attr&&NA[oo]) oo=NA[oo];
+  return s+oo;
+}
+
+/* --- drills --- */
+var CFG=PACK.get('numbers',{});
+/* ---- drill artwork ---- */
+function clockArt(h,mm){
+  var cx=60,cy=60,R=52;
+  var ha=((h%12)+mm/60)*30-90, ma=mm*6-90;
+  function tip(a,r){return (cx+r*Math.cos(a*Math.PI/180)).toFixed(1)+','+(cy+r*Math.sin(a*Math.PI/180)).toFixed(1);}
+  var ticks='';
+  for(var i=0;i<12;i++){
+    var a=i*30-90, big=i%3===0;
+    ticks+='<line class="ctick" x1="'+tip(a,R-(big?9:5)).replace(',','" y1="')+'" x2="'+tip(a,R-2).replace(',','" y2="')+'"/>';
+  }
+  return '<svg class="drillart" viewBox="0 0 120 120" role="img" aria-label="'+h+':'+('0'+mm).slice(-2)+'">'+
+    '<circle class="cface" cx="'+cx+'" cy="'+cy+'" r="'+R+'"/>'+ticks+
+    '<line class="chand hour" x1="'+cx+'" y1="'+cy+'" x2="'+tip(ha,R*0.5).replace(',','" y2="')+'"/>'+
+    '<line class="chand min" x1="'+cx+'" y1="'+cy+'" x2="'+tip(ma,R*0.78).replace(',','" y2="')+'"/>'+
+    '<circle class="cpin" cx="'+cx+'" cy="'+cy+'" r="4.5"/></svg>'+
+    '<div class="artkey"><span class="k1">short hand → <b class="kr">시</b> native</span>'+
+    (mm?'<span class="k2">long hand → <b class="kr">분</b> Sino</span>':'')+'</div>';
+}
+/* memory hooks for 1–10: the sound-alike tricks learners already trade
+   ("a duel takes two", "an ill goblin"). Shown when a small number is revealed. */
+var HOOK_N={1:'<b>하나</b>: the story starts with a girl named <b>Hana</b>: just <b>one</b> of her.',
+ 2:'<b>둘</b>: a <b>duel</b> needs exactly two.',
+ 3:'<b>셋</b>. “I <b>set</b> three plates on the table.”',
+ 4:'<b>넷</b>: a <b>net</b> has four corners.',
+ 5:'<b>다섯</b>. <b>ta-DA!</b> a whole hand: five fingers.',
+ 6:'<b>여섯</b>. “<b>Yo! Socks!</b>” six socks in the drawer.',
+ 7:'<b>일곱</b>. “<b>I’ll gobble</b> seven dumplings.”',
+ 8:'<b>여덟</b>. “<b>Yo, dolls!</b>” eight dolls on the shelf.',
+ 9:'<b>아홉</b>: a <b>hobbit</b> swinging on a vine: <b>a-HOP!</b>',
+ 10:'<b>열</b>. <b>yell</b> “ten!” when you get there.'};
+var HOOK_S={1:'<b>일</b>. “<b>I’ll</b> work at <b>one</b> o’clock.”',
+ 2:'<b>이</b>. <b>ee</b>: your two <b>eyes</b>.',
+ 3:'<b>삼</b>. <span class="kr">삼겹살</span> is “<b>three</b>-layer pork belly”. The <span class="kr">삼</span> is the three.',
+ 4:'<b>사</b>: also sounds like the word for <i>death</i>, so Korean elevators often label the 4th floor <b>F</b>. Creepy sticks.',
+ 5:'<b>오</b>: the classic chant for 5·6·7·8: “<b>Oh</b>, yuck! Chill, pal!” This is the <b>Oh</b>.',
+ 6:'<b>육</b>. “Oh, <b>yuck</b>! Chill, pal!”: the <b>yuck</b>.',
+ 7:'<b>칠</b>. “Oh, yuck! <b>Chill</b>, pal!”: the <b>chill</b>.',
+ 8:'<b>팔</b>. “Oh, yuck! Chill, <b>pal</b>!”, and <span class="kr">팔</span> really is the Korean word for <b>arm</b>: two arms make an 8.',
+ 9:'<b>구</b>. Korean kids chant the times table as <span class="kr">구구단</span>, the “nine-nine song”.',
+ 10:'<b>십</b>: take a <b>sip</b>: you made it to ten.'};
+function hookLine(n,sys){
+  if(n<1||n>10) return '';
+  var h=sys==='n'?HOOK_N[n]:HOOK_S[n];
+  return h?'<div class="hook">🧠 '+h+'</div>':'';
+}
+var UNIT_EMOJI={'개':'📦','명':'🧍','잔':'☕','병':'🍾','마리':'🐰','권':'📕','장':'🎫','인분':'🍲'};
+function countArt(n,unit){
+  var e=UNIT_EMOJI[unit]; if(!e||n>12) return '';
+  var h='<div class="countrow" aria-label="'+n+' '+unit+'">';
+  for(var i=0;i<n;i++) h+='<span>'+e+'</span>';
+  return h+'</div>';
+}
+function moneyArt(n){
+  var units=[[50000,'note n5','5만'],[10000,'note n1','만'],[5000,'note n05','5천'],
+             [1000,'note n01','천'],[500,'coin','500'],[100,'coin','100']];
+  var left=n, parts=[];
+  units.forEach(function(u){
+    var c=Math.floor(left/u[0]); left-=c*u[0];
+    for(var i=0;i<c && parts.length<12;i++) parts.push(u);
+  });
+  if(!parts.length) return '';
+  var h='<div class="moneyrow">';
+  parts.forEach(function(u){
+    h+= u[1]==='coin'
+      ? '<span class="coin">'+u[2]+'</span>'
+      : '<span class="'+u[1]+'"><i>₩</i>'+u[2]+'</span>';
+  });
+  return h+'</div>';
+}
+var ALL={
+ plain:{name:'🔢 Just the number', make:function(){
+    var n=1+Math.floor(Math.random()*(CFG.max||200));
+    var nat=nativeN(n,false);
+    return {show:String(n), sub:'Say it both ways',
+      kr:sino(n)+(nat?'  /  '+nat:''), say:sino(n),
+      why:'Sino <span class="kr">'+sino(n)+'</span>'+(nat?' · Native <span class="kr">'+nat+'</span>':': over 99, only Sino is used.')+hookLine(n,'s')+hookLine(n,'n')};
+  }},
+ price:{name:'💵 Price 원', make:function(){
+    var opts=[900,1500,2500,3000,4500,5000,6800,8000,9900,12000,15000,23000,35000,49000,120000];
+    var n=opts[Math.floor(Math.random()*opts.length)];
+    return {show:n.toLocaleString('en-US')+'원', sub:'How much is it?',
+      kr:sino(n)+' 원', say:sino(n)+' 원', art:moneyArt(n),
+      why:'Money always uses <b>Sino</b> numbers. <span class="kr">10,000 = 만</span> (not <span class="kr">일만</span>).'};
+  }},
+ time:{name:'⏰ Time 시 분', make:function(){
+    var h=1+Math.floor(Math.random()*12);
+    var mm=[0,5,10,15,20,25,30,40,45,50][Math.floor(Math.random()*10)];
+    var kr=nativeN(h,true)+' 시'+(mm?' '+sino(mm)+' 분':'');
+    return {show:h+':'+('0'+mm).slice(-2), sub:'What time is it?',
+      kr:kr, say:kr, art:clockArt(h,mm),
+      why:'Hour = <b>Native</b> (<span class="kr">'+nativeN(h,true)+'</span>), minutes = <b>Sino</b> (<span class="kr">'+(mm?sino(mm):'—')+'</span>). Two systems in one sentence!'};
+  }},
+ age:{name:'🎂 Age 살', make:function(){
+    var n=1+Math.floor(Math.random()*70);
+    return {show:n, sub:'How old?', kr:nativeN(n,true)+' 살', say:nativeN(n,true)+' 살',
+      why:'Age uses <b>Native</b> numbers. Polite form: <span class="kr">'+nativeN(n,true)+' 살이에요.</span>'+hookLine(n,'n')};
+  }},
+ count:{name:'🍎 Counting 개 명 잔', make:function(){
+    var C=CFG.counters||[['개','things'],['명','people'],['잔','cups / glasses'],['병','bottles'],['마리','animals'],['권','books'],['장','sheets, tickets']];
+    var c=C[Math.floor(Math.random()*C.length)];
+    var unit=(typeof c==='string')?c:c[0], what=(typeof c==='string')?'':c[1];
+    var n=1+Math.floor(Math.random()*20);
+    return {show:n+' '+unit, sub:what?('counting '+what):'How many?', art:countArt(n,unit),
+      kr:nativeN(n,true)+' '+unit, say:nativeN(n,true)+' '+unit,
+      why:'Counting uses <b>Native</b> numbers, and 1·2·3·4·20 change shape: <span class="kr">하나→한, 둘→두, 셋→세, 넷→네, 스물→스무</span>.'+hookLine(n,'n')};
+  }},
+ phone:{name:'📱 Phone number', make:function(){
+    function d4(){var s='';for(var i=0;i<4;i++)s+=Math.floor(Math.random()*10);return s;}
+    var a=d4(), b=d4();
+    function readDigits(str){
+      return str.split('').map(function(ch){ return ch==='0'?'공':SD[+ch]; }).join(' ');
+    }
+    var kr='공일공 에 '+readDigits(a)+' 에 '+readDigits(b);
+    return {show:'010-'+a+'-'+b, sub:'Read it digit by digit',
+      kr:'공일공 - '+readDigits(a)+' - '+readDigits(b), say:kr,
+      why:'Phone numbers are <b>Sino</b>, one digit at a time. <b>0 is <span class="kr">공</span></b>, not <span class="kr">영</span>. The dash is <span class="kr">에</span>.'};
+  }},
+ date:{name:'📅 Date 월 일', make:function(){
+    var MON=['일','이','삼','사','오','유','칠','팔','구','시','십일','십이'];
+    var m=1+Math.floor(Math.random()*12), d=1+Math.floor(Math.random()*28);
+    var kr=MON[m-1]+'월 '+sino(d)+'일';
+    return {show:m+'월 '+d+'일', sub:'What is the date?', kr:kr, say:kr,
+      why:'Dates are <b>Sino</b>. Two are irregular: <b>June = <span class="kr">유월</span></b> (not 육월) and <b>October = <span class="kr">시월</span></b> (not 십월).'};
+  }}
+};
+var order=['plain','price','time','age','count','phone','date'];
+var enabled=(CFG.drills&&CFG.drills.length?CFG.drills:order).filter(function(k){return ALL[k];});
+if(!enabled.length) enabled=order.slice();
+
+var kind=enabled[0], cur=null, open=false, fixed=null, fi=0;
+if(CFG.items&&CFG.items.length) fixed=CFG.items;
+
+var kindsEl=document.getElementById('kinds');
+enabled.forEach(function(k){
+  var b=document.createElement('button'); b.textContent=ALL[k].name; b.dataset.k=k;
+  b.onclick=function(){ kind=k; fixed=null; next(); };
+  kindsEl.appendChild(b);
+});
+if(fixed){
+  var b=document.createElement('button'); b.textContent='⭐ My list ('+fixed.length+')'; b.dataset.k='__fixed';
+  b.onclick=function(){ fixed=CFG.items; fi=0; kind='__fixed'; next(); };
+  kindsEl.insertBefore(b,kindsEl.firstChild);
+  kind='__fixed';
+}
+
+function next(){
+  [].forEach.call(kindsEl.children,function(b){ b.className=b.dataset.k===kind?'on':''; });
+  if(kind==='__fixed'&&fixed&&fixed.length){
+    var it=fixed[fi%fixed.length]; fi++;
+    var k=it.kind&&ALL[it.kind]?it.kind:'plain';
+    cur = it.n!=null ? makeFixed(k,it) : ALL[k].make();
+  }else{
+    cur=ALL[kind]?ALL[kind].make():ALL.plain.make();
+  }
+  open=false; render();
+}
+function makeFixed(k,it){
+  var n=it.n;
+  if(k==='price') return {show:n.toLocaleString('en-US')+'원',sub:'How much is it?',kr:sino(n)+' 원',say:sino(n)+' 원',art:moneyArt(n),
+    why:'Money always uses <b>Sino</b> numbers.'};
+  if(k==='age') return {show:n,sub:'How old?',kr:nativeN(n,true)+' 살',say:nativeN(n,true)+' 살',why:'Age uses <b>Native</b> numbers.'};
+  if(k==='count'){ var u=it.unit||'개';
+    return {show:n+' '+u,sub:'How many?',kr:nativeN(n,true)+' '+u,say:nativeN(n,true)+' '+u,art:countArt(n,u),
+    why:'Counting uses <b>Native</b> numbers: <span class="kr">한, 두, 세, 네, 스무</span>.'}; }
+  var nat=nativeN(n,false);
+  return {show:String(n),sub:'Say it both ways',kr:sino(n)+(nat?'  /  '+nat:''),say:sino(n),
+    why:'Sino <span class="kr">'+sino(n)+'</span>'+(nat?' · Native <span class="kr">'+nat+'</span>':'')};
+}
+function render(){
+  var c=document.getElementById('card');
+  c.className='card'+(open?' open':'');
+  c.innerHTML=
+    '<div class="kind">'+(ALL[kind]?ALL[kind].name:'⭐ MY LIST')+'</div>'+
+    '<div class="target kr">'+cur.show+'</div>'+
+    (cur.art||'')+
+    '<div class="tsub">'+cur.sub+'</div>'+
+    '<div class="prompt">Say it in Korean, then reveal.</div>'+
+    '<div class="ans"><div class="kans kr">'+cur.kr+'</div>'+
+      '<div class="rans">≈ '+rom(cur.kr)+'</div>'+
+      '<div class="why">'+cur.why+'</div></div>'+
+    '<div class="acts">'+(open
+      ? '<button id="nx">Next →</button>'
+      : '<button id="reveal">👀 Reveal</button><button id="nx">Skip →</button>')+'</div>'+
+    '<div class="mini"><button id="say">🔊 Hear it</button><button id="slow">🐢 Slowly</button></div>';
+  document.getElementById('nx').onclick=next;
+  if(!open) document.getElementById('reveal').onclick=doReveal;
+  document.getElementById('say').onclick=function(){TTS.say(cur.say,0.8);};
+  document.getElementById('slow').onclick=function(){TTS.say(cur.say,0.4);};
+}
+function doReveal(){ open=true; render(); TTS.say(cur.say,0.8); }
+document.addEventListener('keydown',function(e){
+  if(e.key===' '){e.preventDefault(); if(!open)doReveal(); else TTS.say(cur.say,0.8);}
+  else if(e.key==='Enter'){e.preventDefault();next();}
+  else if(e.key==='s'||e.key==='S'){TTS.say(cur.say,0.8);}
+});
+next();
+
+/* --- voice settings popover, shared by all ten apps --- */
+function mountChrome(){
+  var btn=document.getElementById('abSet'); if(!btn) return;
+  var ov=document.createElement('div'); ov.id='abov';
+  ov.innerHTML='<div id="abbox"><h2>🔊 Voice</h2>'+
+    '<p>Windows and macOS ship more than one Korean voice. Some are much clearer than others: try them.</p>'+
+    '<label for="abVoice">Korean voice</label><select id="abVoice"></select>'+
+    '<label for="abRate">Speed. <span id="abRateV">normal</span></label>'+
+    '<input type="range" id="abRate" min="0.5" max="1.3" step="0.05">'+
+    '<div class="abhint">Beginners follow about 30% slower than a native pace.</div>'+
+    '<div class="r"><button id="abTest">🔊 Test</button><button id="abClose">Done</button></div></div>';
+  document.body.appendChild(ov);
+  var sel=ov.querySelector('#abVoice'), rng=ov.querySelector('#abRate'), lab=ov.querySelector('#abRateV');
+  function label(v){return v<0.75?'slow':v<0.95?'a little slow':v<1.1?'normal':'fast';}
+  function fill(list,cur){
+    sel.innerHTML='';
+    if(!list||!list.length){
+      var o=document.createElement('option'); o.textContent='No Korean voice on this device'; o.disabled=true;
+      sel.appendChild(o); sel.disabled=true; return;
+    }
+    sel.disabled=false;
+    list.forEach(function(v){
+      var o=document.createElement('option'); o.value=v.name;
+      o.textContent=v.name+' ('+v.lang+')';
+      if(cur&&v.name===cur.name) o.selected=true;
+      sel.appendChild(o);
+    });
+  }
+  window.__voicesChanged=fill;
+  fill(TTS.voices(),TTS.current());
+  rng.value=TTS.rate(); lab.textContent=label(TTS.rate());
+  sel.onchange=function(){TTS.setVoice(this.value);TTS.say('안녕하세요');};
+  rng.oninput=function(){TTS.rate(+this.value);lab.textContent=label(+this.value);};
+  rng.onchange=function(){TTS.say('안녕하세요. 만나서 반가워요.');};
+  ov.querySelector('#abTest').onclick=function(){TTS.say('안녕하세요. 만나서 반가워요.');};
+  ov.querySelector('#abClose').onclick=function(){ov.className='';};
+  ov.onclick=function(e){if(e.target===ov)ov.className='';};
+  btn.onclick=function(){ov.className='on';};
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')ov.className='';});
+}
+
+(function(){
+  var a=document.getElementById('hkN'), b=document.getElementById('hkS');
+  if(a&&b) for(var i=1;i<=10;i++){
+    a.insertAdjacentHTML('beforeend','<li>'+HOOK_N[i]+'</li>');
+    b.insertAdjacentHTML('beforeend','<li>'+HOOK_S[i]+'</li>');
+  }
+})();
+mountChrome();
+</script>
+
+<script src="assets/_progress.js"></script>
+<script>
+Progress.visit('06');
+/* 다음 화면으로 넘어가는 큰 링크를 누르면 그 화면을 끝낸 것으로 본다 */
+document.addEventListener('click',function(e){
+  var t=e.target; while(t&&t!==document){ if(t.classList&&t.classList.contains('onward')){ Progress.done('06'); break; } t=t.parentNode; }
+},true);
+</script>
+</body>
+</html>

@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Syllable Builder</title>
+<style>
+:root{
+  /* hanji paper and meok ink */
+  --bg:#f7efdd; --card:#fffdf6; --ink:#221c14; --muted:#6b6353; --line:#221c14;
+  /* obangsaek-leaning accents: 청 홍 황 녹 자 */
+  --blue:#1d5fa9; --orange:#d46508; --green:#2c7a57; --red:#bf3b2e; --purple:#6d3fae;
+  /* tinted hanji surfaces */
+  --sky:#eef2f7; --mint:#edf2ec; --blush:#f7ece7; --amber:#f7f1dc; --paper2:#fbf7ec;
+  --hair:#ded2b8;
+  /* depth */
+  --sh:4px 4px 0 var(--line); --sh1:2px 2px 0 var(--line);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  font-size:17px;line-height:1.45;padding:18px 14px 30px;max-width:1180px;margin:0 auto}
+.kr{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;font-weight:800;word-break:keep-all}
+h1{font-size:clamp(20px,4.4vw,30px);margin:0;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:14px;margin-top:2px}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+button{font:inherit;font-weight:700;cursor:pointer;border:3px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:12px;padding:10px 14px;min-height:46px;box-shadow:2px 2px 0 var(--line);transition:transform .06s,box-shadow .06s}
+button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--line)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tabs button{border-radius:999px}
+.tabs button.on{background:var(--blue);color:#fff}
+.panel{background:var(--card);border:3px solid var(--line);border-radius:20px;box-shadow:var(--sh);padding:16px;margin-bottom:16px}
+.stage{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:center}
+@media(max-width:700px){.stage{grid-template-columns:1fr;text-align:center}}
+.out{font-size:clamp(110px,30vw,210px);line-height:.95;min-width:1.1em;text-align:center}
+.out.empty{color:#d8d3c7}
+.romline{font-size:clamp(26px,6vw,42px);font-weight:800;color:var(--blue);letter-spacing:.03em;word-break:break-all}
+.pieces{color:var(--muted);font-size:15px;font-weight:700;margin-top:4px}
+.shapebox{display:inline-grid;gap:3px;border:3px solid var(--line);border-radius:10px;padding:5px;background:var(--paper2);margin-top:12px}
+/* block map */
+.blockmap{display:block;margin-top:12px}
+.mapfr{fill:var(--paper2);stroke:var(--line);stroke-width:3}
+.mapc{stroke:var(--line);stroke-width:2.5}
+.mapc.ci{fill:#ffd9bf}
+.mapc.cv,.mapc.cv2{fill:#cfe0ff}
+.mapc.cf{fill:#c8f0dc}
+.mapj{font-size:30px;font-weight:800;text-anchor:middle;dominant-baseline:central;fill:var(--ink)}
+.mapnbg{fill:var(--line)}
+.mapn{font:800 11px "Segoe UI",system-ui,sans-serif;fill:#fff;text-anchor:middle}
+.cell{width:34px;height:26px;border-radius:5px;background:#eae5d8;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#8a8271}
+.cell.i{background:#ffd9bf;color:#8a4a1c}
+.cell.v{background:#cfe0ff;color:#1c4390}
+.cell.f{background:#c8f0dc;color:#0d5c3d}
+.shapelabel{font-size:14px;font-weight:800;margin-top:8px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.row button{flex:1 1 150px}
+#say{background:var(--orange)}
+.pickers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media(max-width:800px){.pickers{grid-template-columns:1fr}}
+.pk h3{margin:0 0 4px;font-size:16px}
+.pk .lab{color:var(--muted);font-size:13px;margin-bottom:8px;font-weight:700}
+.jam{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:7px}
+.j{border:3px solid var(--line);border-radius:11px;background:var(--card);box-shadow:2px 2px 0 var(--line);
+  min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;line-height:1;padding:2px}
+.j .c{font-size:26px}
+.j .r{font-size:10px;color:var(--muted);font-weight:800}
+.j.on{background:var(--blue);color:#fff}
+.j.on .r{color:#dbe6ff}
+.j.none{font-size:13px;font-weight:800}
+#quizbar{display:none;align-items:center;gap:14px;flex-wrap:wrap}
+body.quiz #quizbar{display:flex}
+body.quiz #buildhint{display:none}
+.target{font-size:clamp(56px,13vw,96px);line-height:1;border:4px dashed var(--line);border-radius:16px;padding:4px 20px;background:#fffdf6}
+.verdict{font-size:clamp(20px,4vw,26px);font-weight:800}
+.ok{color:var(--green)} .no{color:var(--red)}
+.score{font-weight:800;font-size:18px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.chips button{min-height:44px;padding:8px 14px;font-size:22px}
+.warn{display:none;background:#ffe8e8;border:3px solid var(--red);border-radius:14px;padding:10px 14px;font-weight:700;margin-bottom:12px;font-size:15px}
+body.no-voice .warn{display:block}
+.tip{background:#fffdf6;border:3px dashed var(--line);border-radius:14px;padding:12px 14px;font-size:16px;margin-top:12px}
+.foot{margin-top:8px;color:var(--muted);font-size:13px;text-align:center}
+/* --- shared chrome: nav bar, focus, motion, pack loader --- */
+.appbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-2px 0 14px}
+.appbar a,.appbar button{font:inherit;font-weight:800;font-size:14px;text-decoration:none;
+  color:var(--muted);background:transparent;border:0;box-shadow:none;padding:7px 10px;
+  min-height:40px;display:inline-flex;align-items:center;gap:6px;border-radius:10px;cursor:pointer;transition:none}
+.appbar a:hover,.appbar button:hover{background:rgba(0,0,0,.055);color:var(--ink)}
+.appbar a:active,.appbar button:active{transform:none;box-shadow:none}
+.ab-home{border:2px solid var(--line)!important;color:var(--ink)!important;background:var(--card)!important;
+  box-shadow:2px 2px 0 var(--line)!important}
+.ab-home:active{transform:translate(2px,2px)!important;box-shadow:none!important}
+.ab-step{background:#a63a2e;color:#fbf3e4;font-size:12px;font-weight:800;letter-spacing:.12em;
+  padding:5px 9px;border-radius:7px;box-shadow:inset 0 0 0 2px rgba(251,243,228,.55);margin-left:2px}
+.ab-right{margin-left:auto;display:flex;gap:2px;align-items:center}
+.ab-arrow{font-size:19px;line-height:1;padding:7px 13px}
+.ab-arrow[aria-disabled="true"]{opacity:.25;pointer-events:none}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:4px}
+@keyframes pop{0%{transform:scale(.94)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
+.pop{animation:pop .22s ease-out}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+#abov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(18,18,24,.55);z-index:70;
+  display:none;align-items:center;justify-content:center;padding:14px}
+#abov.on{display:flex}
+#abbox label{display:block;font-weight:800;font-size:14px;margin:14px 0 6px}
+#abbox select,#abbox input[type=range]{width:100%;font:inherit;font-weight:700;
+  border:3px solid var(--line);border-radius:12px;padding:10px;background:var(--card);min-height:46px}
+#abbox input[type=range]{padding:0;height:46px}
+.abhint{font-size:14px;color:var(--muted);margin-top:6px}
+/* --- hanji paper + saekdong band --- */
+body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(rgba(120,90,40,.055) 1px,transparent 1.3px),
+    radial-gradient(rgba(120,90,40,.04) 1px,transparent 1.3px),
+    radial-gradient(rgba(255,255,255,.5) 1.4px,transparent 1.6px);
+  background-size:26px 26px,42px 42px,34px 34px;
+  background-position:0 0,13px 21px,7px 3px;
+}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:5px;z-index:90;pointer-events:none;
+  background:repeating-linear-gradient(90deg,
+    #a8524e 0 44px,#f3ecd9 44px 47px,
+    #c9973f 47px 91px,#f3ecd9 91px 94px,
+    #41678f 94px 138px,#f3ecd9 138px 141px,
+    #4f7d62 141px 185px,#f3ecd9 185px 188px,
+    #6f5590 188px 232px,#f3ecd9 232px 235px);
+  opacity:.85}
+</style>
+<link rel="stylesheet" href="assets/_ui.css">
+</head>
+<body>
+
+<nav class="appbar">
+  <a class="ab-home" href="index.html">‹ All apps</a>
+  <span class="ab-step">02 / 10</span>
+  <span class="ab-right">
+    <a class="ab-arrow" href="01f-batchim.html" title="Previous app" aria-label="Previous app">‹</a>
+    <a class="ab-arrow" href="03-read-it-loanwords.html" title="Next app" aria-label="Next app">›</a>
+    <button id="abSet" title="Voice settings" aria-label="Voice settings">🔊</button>
+  </span>
+</nav>
+
+<div class="warn">🔇 No Korean voice on this device: audio buttons will be silent. The teacher can read aloud instead.</div>
+
+<header>
+  <div class="seal">02</div>
+  <div style="flex:1;min-width:200px">
+    <h1>Syllable Builder</h1>
+    <div class="sub">Every Korean block = consonant + vowel (+ final). Build one and hear it.</div>
+  </div>
+  <div class="tabs">
+    <button id="tBuild" class="on">🧩 Build</button>
+    <button id="tQuiz">🎯 Quiz</button>
+  </div>
+</header>
+
+<div class="panel">
+  <div id="quizbar">
+    <div>
+      <div style="font-size:13px;font-weight:800;color:var(--muted)">MAKE THIS BLOCK</div>
+      <div class="target kr" id="target">가</div>
+    </div>
+    <div>
+      <div class="verdict" id="verdict">Pick the pieces below</div>
+      <div class="score" id="score">Score 0 / 0</div>
+    </div>
+    <button id="skip">Next question →</button>
+  </div>
+
+  <div class="stage" style="margin-top:12px">
+    <div class="out kr empty" id="out">?</div>
+    <div>
+      <div class="romline" id="rom">—</div>
+      <div class="pieces" id="pieces">Choose a consonant and a vowel.</div>
+      <div id="shape"></div>
+      <div class="shapelabel" id="shapelabel"></div>
+      <div class="row">
+        <button id="say">🔊 Say it</button>
+        <button id="slow">🐢 Slowly</button>
+        <button id="clear">✕ Clear</button>
+      </div>
+      <div id="buildhint">
+        <div class="tip">Try a real syllable. Tap one to see it taken apart:</div>
+        <div class="chips kr" id="chips"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="pickers">
+    <div class="pk">
+      <h3>1. First consonant</h3>
+      <div class="lab">초성 · always on the left or top</div>
+      <div class="jam" id="pi"></div>
+    </div>
+    <div class="pk">
+      <h3>2. Vowel</h3>
+      <div class="lab">중성 · goes right, below, or around</div>
+      <div class="jam" id="pv"></div>
+    </div>
+    <div class="pk">
+      <h3>3. Final consonant</h3>
+      <div class="lab">종성 (받침) · optional, always at the bottom</div>
+      <div class="jam" id="pf"></div>
+    </div>
+  </div>
+</div>
+
+
+<script src="_pack.js"></script>
+<script>
+var PACK=(function(){
+  var d=(window.STUDENT_PACK&&typeof window.STUDENT_PACK==='object')?window.STUDENT_PACK:null;
+  function val(k){var v=d&&d[k];if(v==null)return null;if(Array.isArray(v)&&!v.length)return null;return v;}
+  return{data:d,src:d?(d.student||'pack'):'',live:!!d,
+    get:function(k,fb){var v=val(k);return v===null?fb:v;},
+    has:function(k){return val(k)!==null;}};
+})();
+var TTS=(function(){
+  var voices=[], voice=null, pref=null, mult=1;
+  try{var s=JSON.parse(localStorage.getItem('ktts')||'{}');pref=s.voice||null;mult=+s.rate||1;}catch(e){}
+  function save(){try{localStorage.setItem('ktts',JSON.stringify({voice:pref,rate:mult}));}catch(e){}}
+  function korean(){return voices.filter(function(v){return /^ko/i.test(v.lang||'')||/korean|한국/i.test(v.name||'');});}
+  function pick(){
+    voices=(window.speechSynthesis&&speechSynthesis.getVoices())||[];
+    var ks=korean(); voice=null;
+    if(pref) for(var i=0;i<ks.length;i++) if(ks[i].name===pref) voice=ks[i];
+    if(!voice) voice=ks[0]||null;
+    document.body.classList.toggle('no-voice',!voice);
+    if(window.__voicesChanged) window.__voicesChanged(ks,voice);
+  }
+  if(window.speechSynthesis){pick();speechSynthesis.onvoiceschanged=pick;setTimeout(pick,600);}
+  else document.body.classList.add('no-voice');
+  function utt(t,r){
+    var u=new SpeechSynthesisUtterance(t);
+    u.lang='ko-KR'; u.rate=Math.max(.1,Math.min(2,(r||0.82)*mult));
+    if(voice)u.voice=voice; return u;
+  }
+  return {
+    say:function(t,r){if(!window.speechSynthesis||!t)return;
+      try{speechSynthesis.cancel();}catch(e){} speechSynthesis.speak(utt(t,r));},
+    queue:function(list,r){if(!window.speechSynthesis||!list||!list.length)return;
+      try{speechSynthesis.cancel();}catch(e){} list.forEach(function(t){speechSynthesis.speak(utt(t,r));});},
+    voices:korean, current:function(){return voice;},
+    setVoice:function(n){pref=n;pick();save();},
+    rate:function(x){if(x!=null){mult=x;save();} return mult;}
+  };
+})();
+
+/* Unicode Hangul tables */
+var L='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ'.split('');
+var V='ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ'.split('');
+var T=['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+var Lr=['g','kk','n','d','tt','r','m','b','pp','s','ss','-','j','jj','ch','k','t','p','h'];
+var Vr=['a','ae','ya','yae','eo','e','yeo','ye','o','wa','wae','oe','yo','u','wo','we','wi','yu','eu','ui','i'];
+var Tr=['','k','k','k','n','n','n','t','l','k','m','p','l','t','t','p','m','p','p','t','t','ng','t','t','k','t','p','t'];
+var RIGHT=[0,1,2,3,4,5,6,7,20], BELOW=[8,12,13,17,18];
+
+/* ---- content: from the student pack, or these defaults ---- */
+var CFG=PACK.get('blocks',{});
+var DEF_FINALS=['','ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ'];
+var DEF_EXAMPLES=['한','글','밥','물','책','강','김','치','사','랑','옷','꽃'];
+var DEF_TARGETS='가나다라마바사아자차카타파하고노도로모보소오조기니디리미비시이지치키티피히구누두루무부수우주추한글밥물책강김치사랑옷꽃산달별손발눈밤집문말꿈'.split('');
+
+var FINALS=(CFG.finals||DEF_FINALS).map(function(ch){var i=T.indexOf(ch||'');return i<0?0:i;});
+if(FINALS.indexOf(0)<0) FINALS.unshift(0);
+var EXAMPLES=CFG.examples||DEF_EXAMPLES;
+var TARGETS=CFG.targets||DEF_TARGETS;
+
+var li=-1, vi=-1, fi=0, quiz=false, target=null, right=0, total=0;
+
+function compose(){ if(li<0||vi<0) return ''; return String.fromCharCode(0xAC00+(li*21+vi)*28+fi); }
+function decompose(ch){
+  var c=ch.charCodeAt(0)-0xAC00;
+  if(c<0||c>11171) return null;
+  return {l:Math.floor(c/588), v:Math.floor((c%588)/28), f:c%28};
+}
+function romanize(){ if(li<0||vi<0) return '—'; return (li===11?'':Lr[li])+Vr[vi]+Tr[fi]; }
+
+/* the block map: the real jamo drawn in the slots they occupy */
+function shapeHTML(){
+  if(li<0||vi<0){ document.getElementById('shapelabel').textContent=''; return ''; }
+  var type = RIGHT.indexOf(vi)>=0?'right':(BELOW.indexOf(vi)>=0?'below':'wrap'), f=fi>0, lab=document.getElementById('shapelabel');
+  var W=120, H=f?150:110, pad=6;
+  function box(x,y,w,h,cls,ch,n){
+    return '<rect class="mapc '+cls+'" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="10"/>'+
+      '<text class="mapj kr" x="'+(x+w/2)+'" y="'+(y+h/2)+'">'+ch+'</text>'+
+      '<circle class="mapnbg" cx="'+(x+13)+'" cy="'+(y+13)+'" r="9"/>'+
+      '<text class="mapn" x="'+(x+13)+'" y="'+(y+16.5)+'">'+n+'</text>';
+  }
+  var vh=f?H-pad*3-46:0;                      // room left for the final row
+  var bodyH=f?H-46-pad*3:H-pad*2;
+  var g='';
+  if(type==='right'){
+    lab.textContent='This vowel stands to the RIGHT of the consonant.'+(f?' The final sits underneath everything.':'');
+    g=box(pad,pad,(W-pad*3)*0.52,bodyH,'ci',L[li],1)+
+      box(pad*2+(W-pad*3)*0.52,pad,(W-pad*3)*0.48,bodyH,'cv',V[vi],2);
+  }else if(type==='below'){
+    lab.textContent='This vowel lies BELOW the consonant.'+(f?' The final goes under that.':'');
+    g=box(pad,pad,W-pad*2,bodyH*0.52,'ci',L[li],1)+
+      box(pad,pad+bodyH*0.52+4,W-pad*2,bodyH*0.48-4,'cv',V[vi],2);
+  }else{
+    lab.textContent='This vowel WRAPS around: part on the right, part below.';
+    g=box(pad,pad,(W-pad*3)*0.55,bodyH*0.55,'ci',L[li],1)+
+      box(pad*2+(W-pad*3)*0.55,pad,(W-pad*3)*0.45,bodyH,'cv',V[vi],2)+
+      box(pad,pad+bodyH*0.55+4,(W-pad*3)*0.55,bodyH*0.45-4,'cv2',V[vi],2);
+  }
+  if(f) g+=box(pad,H-pad-42,W-pad*2,42,'cf',T[fi],3);
+  return '<svg class="blockmap" viewBox="0 0 '+W+' '+H+'" style="height:'+(H*1.15)+'px">'+
+    '<rect class="mapfr" x="1.5" y="1.5" width="'+(W-3)+'" height="'+(H-3)+'" rx="14"/>'+g+'</svg>';
+}
+function render(){
+  var s=compose(), out=document.getElementById('out');
+  out.textContent = s || '?';
+  out.className='out kr'+(s?'':' empty');
+  document.getElementById('rom').textContent = s?romanize():'—';
+  document.getElementById('pieces').innerHTML = s
+    ? L[li]+' + '+V[vi]+(fi>0?' + '+T[fi]:'')+'  →  '+s : 'Choose a consonant and a vowel.';
+  document.getElementById('shape').innerHTML = shapeHTML();
+  paintI(); paintV(); paintF();
+  if(quiz && target){
+    var v=document.getElementById('verdict');
+    if(!s){ v.textContent='Pick the pieces below'; v.className='verdict'; }
+    else if(s===target){ v.textContent='✓ Correct!'; v.className='verdict ok'; }
+    else { v.textContent='✕ Not yet. Keep trying.'; v.className='verdict no'; }
+  }
+}
+function tile(c,r,on,fn){
+  var d=document.createElement('div');
+  d.className='j kr'+(on?' on':'');
+  d.innerHTML='<div class="c">'+c+'</div>'+(r?'<div class="r">'+r+'</div>':'');
+  d.onclick=fn; return d;
+}
+function paintI(){var el=document.getElementById('pi');el.innerHTML='';
+  L.forEach(function(c,i){el.appendChild(tile(c,Lr[i],i===li,function(){li=i;pick();}));});}
+function paintV(){var el=document.getElementById('pv');el.innerHTML='';
+  V.forEach(function(c,i){el.appendChild(tile(c,Vr[i],i===vi,function(){vi=i;pick();}));});}
+function paintF(){
+  var el=document.getElementById('pf'); el.innerHTML='';
+  FINALS.forEach(function(i){
+    var d;
+    if(i===0){ d=document.createElement('div'); d.className='j none'+(fi===0?' on':''); d.textContent='none';
+               d.onclick=function(){fi=0;pick();}; }
+    else d=tile(T[i],Tr[i],fi===i,function(){fi=i;pick();});
+    el.appendChild(d);
+  });
+}
+function pick(){
+  render();
+  var s=compose();
+  if(s) TTS.say(s);
+  if(quiz && target && s===target){ total++; right++; updScore(); setTimeout(newQ,1100); }
+}
+function updScore(){ document.getElementById('score').textContent='Score '+right+' / '+total; }
+
+var chips=document.getElementById('chips');
+EXAMPLES.forEach(function(ch){
+  var b=document.createElement('button'); b.className='kr'; b.textContent=ch;
+  b.onclick=function(){
+    var d=decompose(ch); if(!d)return;
+    li=d.l; vi=d.v; fi=(FINALS.indexOf(d.f)>=0?d.f:0); pick();
+  };
+  chips.appendChild(b);
+});
+
+var POOL=TARGETS.filter(function(ch){ var d=decompose(ch); return d && FINALS.indexOf(d.f)>=0; });
+if(!POOL.length) POOL=TARGETS.slice();
+function newQ(){
+  target=POOL[Math.floor(Math.random()*POOL.length)];
+  document.getElementById('target').textContent=target;
+  li=-1; vi=-1; fi=0; render();
+  TTS.say(target);
+}
+document.getElementById('skip').onclick=function(){ if(quiz){ total++; updScore(); newQ(); } };
+document.getElementById('tBuild').onclick=function(){
+  quiz=false; document.body.classList.remove('quiz');
+  this.className='on'; document.getElementById('tQuiz').className=''; render();
+};
+document.getElementById('tQuiz').onclick=function(){
+  quiz=true; document.body.classList.add('quiz');
+  this.className='on'; document.getElementById('tBuild').className='';
+  right=0; total=0; updScore(); newQ();
+};
+document.getElementById('say').onclick=function(){TTS.say(compose(),0.8)};
+document.getElementById('slow').onclick=function(){TTS.say(compose(),0.4)};
+document.getElementById('clear').onclick=function(){li=-1;vi=-1;fi=0;render()};
+render();
+
+/* --- voice settings popover, shared by all ten apps --- */
+function mountChrome(){
+  var btn=document.getElementById('abSet'); if(!btn) return;
+  var ov=document.createElement('div'); ov.id='abov';
+  ov.innerHTML='<div id="abbox"><h2>🔊 Voice</h2>'+
+    '<p>Windows and macOS ship more than one Korean voice. Some are much clearer than others: try them.</p>'+
+    '<label for="abVoice">Korean voice</label><select id="abVoice"></select>'+
+    '<label for="abRate">Speed. <span id="abRateV">normal</span></label>'+
+    '<input type="range" id="abRate" min="0.5" max="1.3" step="0.05">'+
+    '<div class="abhint">Beginners follow about 30% slower than a native pace.</div>'+
+    '<div class="r"><button id="abTest">🔊 Test</button><button id="abClose">Done</button></div></div>';
+  document.body.appendChild(ov);
+  var sel=ov.querySelector('#abVoice'), rng=ov.querySelector('#abRate'), lab=ov.querySelector('#abRateV');
+  function label(v){return v<0.75?'slow':v<0.95?'a little slow':v<1.1?'normal':'fast';}
+  function fill(list,cur){
+    sel.innerHTML='';
+    if(!list||!list.length){
+      var o=document.createElement('option'); o.textContent='No Korean voice on this device'; o.disabled=true;
+      sel.appendChild(o); sel.disabled=true; return;
+    }
+    sel.disabled=false;
+    list.forEach(function(v){
+      var o=document.createElement('option'); o.value=v.name;
+      o.textContent=v.name+' ('+v.lang+')';
+      if(cur&&v.name===cur.name) o.selected=true;
+      sel.appendChild(o);
+    });
+  }
+  window.__voicesChanged=fill;
+  fill(TTS.voices(),TTS.current());
+  rng.value=TTS.rate(); lab.textContent=label(TTS.rate());
+  sel.onchange=function(){TTS.setVoice(this.value);TTS.say('안녕하세요');};
+  rng.oninput=function(){TTS.rate(+this.value);lab.textContent=label(+this.value);};
+  rng.onchange=function(){TTS.say('안녕하세요. 만나서 반가워요.');};
+  ov.querySelector('#abTest').onclick=function(){TTS.say('안녕하세요. 만나서 반가워요.');};
+  ov.querySelector('#abClose').onclick=function(){ov.className='';};
+  ov.onclick=function(e){if(e.target===ov)ov.className='';};
+  btn.onclick=function(){ov.className='on';};
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')ov.className='';});
+}
+
+mountChrome();
+</script>
+
+<script src="assets/_progress.js"></script>
+<script>
+Progress.visit('02');
+/* 다음 화면으로 넘어가는 큰 링크를 누르면 그 화면을 끝낸 것으로 본다 */
+document.addEventListener('click',function(e){
+  var t=e.target; while(t&&t!==document){ if(t.classList&&t.classList.contains('onward')){ Progress.done('02'); break; } t=t.parentNode; }
+},true);
+</script>
+</body>
+</html>

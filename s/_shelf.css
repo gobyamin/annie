@@ -1,0 +1,59 @@
+/* 선반 전용. 토큰과 공통 부품은 apps/assets/_ui.css 가 이미 준다. */
+
+body{max-width:620px;margin:0 auto;padding:22px 15px 40px;font-size:17px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+.top h1{font-size:clamp(24px,6vw,34px);margin:0;letter-spacing:-.02em;display:flex;align-items:center}
+.hseal{display:inline-flex;align-items:center;justify-content:center;width:1.3em;height:1.3em;
+  margin-right:.36em;border-radius:.22em;background:var(--seal);color:var(--seal-ink);font-size:.7em;
+  box-shadow:inset 0 0 0 .09em var(--seal-rim);flex:0 0 auto}
+.top .sub{color:var(--muted);font-size:14.5px;font-weight:600;margin-top:7px}
+
+.lesson{background:var(--card);border:3px solid var(--line);border-radius:20px;box-shadow:var(--sh);
+  padding:15px 16px;margin-top:16px}
+.lesson.latest{background:var(--amber)}
+.lesson.sofar{background:var(--mint)}
+
+.lhead{display:flex;align-items:center;gap:11px}
+.lmeta{min-width:0}
+.ldate{color:var(--muted);font-size:12.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.ldate b{color:var(--red)}
+.lesson h2{font-size:18.5px;font-weight:800;margin:1px 0 0;line-height:1.25;letter-spacing:-.01em}
+
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+.tag{background:var(--bg);border:2px solid var(--hair);border-radius:99px;padding:3px 10px;
+  font-size:12.5px;font-weight:800;color:var(--muted)}
+
+.sum{margin:9px 0 0;font-size:14.5px;font-weight:600;color:var(--muted);line-height:1.4}
+.sum.empty{font-style:italic}
+.sum.tiny{font-size:12.5px;margin-top:10px}
+
+.items{margin-top:11px;display:grid;gap:7px}
+a.it{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink);
+  background:var(--paper2);border:3px solid var(--line);border-radius:13px;
+  padding:11px 13px;min-height:54px;box-shadow:var(--sh1);
+  transition:transform .07s,box-shadow .07s}
+a.it:active{transform:translate(2px,2px);box-shadow:none}
+a.it .ic{font-size:21px;line-height:1;flex:0 0 auto}
+a.it .lb{flex:1;font-weight:800;font-size:15.5px;line-height:1.2;min-width:0}
+a.it .lb small{display:block;color:var(--muted);font-weight:700;font-size:12.5px;margin-top:2px}
+a.it .go{color:var(--muted);font-size:21px;line-height:1;flex:0 0 auto}
+
+/* 단어 칩. button 이라 _ui.css 의 기본 버튼 규칙을 덮어써야 한다 */
+.words{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.words .w{position:relative;background:var(--card);border:3px solid var(--line);border-radius:12px;
+  padding:8px 12px 8px 12px;box-shadow:var(--sh1);text-align:center;min-width:62px;min-height:0;
+  font:inherit;color:var(--ink);cursor:pointer;display:block}
+.words .w:active{transform:translate(2px,2px);box-shadow:none}
+.words .w b{display:block;font-size:19px;line-height:1.25}
+.words .w small{display:block;color:var(--muted);font-size:11.5px;font-weight:700;margin-top:1px;
+  max-width:150px;white-space:normal}
+.words .w .spk{position:absolute;right:-4px;top:-6px;font-size:11px;font-style:normal;
+  background:var(--orange);border:2px solid var(--line);border-radius:99px;
+  width:19px;height:19px;line-height:15px;display:block}
+.words .w.mute{opacity:.62;cursor:default;box-shadow:none;border-style:dashed}
+.words .w.mute:active{transform:none}
+.words .w.busy{opacity:.5}
+
+.foot{color:var(--muted);font-size:12.5px;font-weight:700;text-align:center;margin-top:26px;
+  line-height:1.5}

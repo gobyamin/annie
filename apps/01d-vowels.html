@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The 21 Vowels</title>
+<style>
+:root{
+  --bg:#f7efdd; --card:#fffdf6; --ink:#221c14; --muted:#6b6353; --line:#221c14;
+  --blue:#1d5fa9; --orange:#d46508; --green:#2c7a57; --red:#bf3b2e;
+  --amber:#f7f1dc; --sh:4px 4px 0 var(--line);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{color:var(--ink);background-color:var(--bg);
+  background-image:radial-gradient(rgba(120,90,40,.05) 1px,transparent 1.3px),
+    radial-gradient(rgba(255,255,255,.5) 1.4px,transparent 1.6px);
+  background-size:26px 26px,34px 34px;
+  font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+  font-size:17px;line-height:1.45;padding:18px 14px 30px;max-width:620px;margin:0 auto}
+.kr{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;font-weight:800}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:5px;z-index:90;pointer-events:none;
+  background:repeating-linear-gradient(90deg,#a8524e 0 44px,#f3ecd9 44px 47px,#c9973f 47px 91px,
+   #f3ecd9 91px 94px,#41678f 94px 138px,#f3ecd9 138px 141px,#4f7d62 141px 185px,#f3ecd9 185px 188px,
+   #6f5590 188px 232px,#f3ecd9 232px 235px);opacity:.85}
+.appbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-2px 0 12px}
+.appbar a,.appbar button{font:inherit;font-weight:800;font-size:14px;text-decoration:none;
+  color:var(--muted);background:transparent;border:0;box-shadow:none;padding:7px 10px;
+  min-height:40px;display:inline-flex;align-items:center;gap:6px;border-radius:10px;cursor:pointer}
+.appbar a:hover,.appbar button:hover{background:rgba(0,0,0,.055);color:var(--ink)}
+.ab-home{border:2px solid var(--line)!important;color:var(--ink)!important;background:var(--card)!important;
+  box-shadow:2px 2px 0 var(--line)!important}
+.ab-home:active{transform:translate(2px,2px)!important;box-shadow:none!important}
+.ab-step{background:#a63a2e;color:#fbf3e4;font-size:12px;font-weight:800;letter-spacing:.1em;
+  padding:5px 9px;border-radius:7px;box-shadow:inset 0 0 0 2px rgba(251,243,228,.55);margin-left:2px}
+.ab-right{margin-left:auto;display:flex;gap:2px;align-items:center}
+.ab-arrow{font-size:19px;line-height:1;padding:7px 13px}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:4px}
+
+header{display:flex;align-items:center;gap:11px;margin-bottom:6px}
+.seal{width:40px;height:40px;border-radius:9px;background:#a63a2e;color:#fbf3e4;display:flex;
+  align-items:center;justify-content:center;font-weight:800;font-size:13px;flex:0 0 auto;
+  box-shadow:inset 0 0 0 2.2px rgba(251,243,228,.55)}
+h1{font-size:clamp(19px,4.4vw,25px);margin:0;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:14px;font-weight:700}
+.secthead{font-size:12.5px;font-weight:800;color:var(--muted);letter-spacing:.07em;margin:16px 0 6px}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+.pick{border:3px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;
+  min-width:48px;min-height:48px;font-size:24px;display:flex;align-items:center;justify-content:center;
+  box-shadow:2px 2px 0 var(--line)}
+button.pick{padding:0;font:inherit}
+.pick:active{transform:translate(2px,2px);box-shadow:none}
+.pick.on{background:#a63a2e;color:#fbf3e4}
+
+.stage{position:relative;border:3px solid var(--line);border-radius:20px;overflow:hidden;
+  box-shadow:var(--sh);background:var(--card);margin:14px 0 0;aspect-ratio:4/3}
+.stage img{position:absolute;top:0;height:100%;width:60%;object-fit:cover;transition:left .55s cubic-bezier(.3,.7,.3,1),opacity .4s ease}
+.stage .single{left:20%;width:60%}
+.stage .partL{left:2%} .stage .partL.merged{left:20%;opacity:.55}
+.stage .partR{left:48%} .stage .partR.merged{left:38%;opacity:.55}
+.bigletter{position:absolute;left:12px;top:10px;font-size:44px;line-height:1;color:var(--ink);
+  background:rgba(255,253,246,.88);border-radius:12px;padding:2px 12px;z-index:2}
+.soundtag{position:absolute;right:12px;top:12px;background:var(--red);color:#fbf3e4;border-radius:11px;
+  padding:5px 12px;font-size:20px;font-weight:800;box-shadow:inset 0 0 0 2.2px rgba(251,243,228,.5);z-index:2}
+.plus{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:34px;font-weight:800;
+  color:var(--muted);opacity:0;transition:opacity .3s ease;z-index:2}
+.plus.show{opacity:1}
+
+.card{background:var(--card);border:3px solid var(--line);border-radius:16px;box-shadow:var(--sh);
+  padding:14px 16px;margin-top:12px;min-height:70px}
+.card p{margin:0;font-size:15.5px;font-weight:600}
+.note{margin-top:8px;background:#f7ece7;border:3px dashed var(--line);border-radius:13px;
+  padding:9px 12px;font-size:14px;font-weight:700}
+.acts{display:flex;gap:10px;margin-top:13px}
+button{font:inherit;font-weight:800;cursor:pointer;border:3px solid var(--line);background:var(--card);
+  color:var(--ink);border-radius:13px;padding:12px 16px;min-height:52px;box-shadow:2px 2px 0 var(--line)}
+button:active{transform:translate(2px,2px);box-shadow:none}
+#say{flex:1;background:var(--orange);color:#fff;font-size:17px}
+.onward{display:block;margin-top:16px;text-align:center;background:var(--card);border:3px solid var(--line);
+  border-radius:15px;padding:14px;font-weight:800;text-decoration:none;color:var(--ink);box-shadow:var(--sh)}
+.onward small{display:block;color:var(--muted);font-weight:700;font-size:13px;margin-top:2px}
+</style>
+<link rel="stylesheet" href="assets/_ui.css">
+</head>
+<body>
+
+<nav class="appbar">
+  <a class="ab-home" href="index.html">‹ All apps</a>
+  <span class="ab-step">01 · VOWELS</span>
+  <span class="ab-right">
+    <a class="ab-arrow" href="01c-tense-chant.html" title="Previous: Tense chant" aria-label="Previous">‹</a>
+    <a class="ab-arrow" href="01e-letter-check.html" title="Next: Letter Checkpoint" aria-label="Next">›</a>
+  </span>
+</nav>
+
+<header>
+  <div class="seal">21</div>
+  <div>
+    <h1>The 21 Vowels</h1>
+    <div class="sub">12 basic shapes, plus 9 built by combining them</div>
+  </div>
+</header>
+
+<div class="secthead">BASIC · TAP ANY ONE</div>
+<div class="row" id="basicPicker"></div>
+
+<div class="stage" id="stage">
+  <img id="imgSingle" class="single" src="" alt="Object whose shape matches this vowel">
+  <img id="imgL" class="partL" src="" alt="First half of the combined vowel" style="display:none">
+  <img id="imgR" class="partR" src="" alt="Second half of the combined vowel" style="display:none">
+  <div class="plus" id="plus">+</div>
+  <div class="bigletter kr" id="bigLetter">ㅏ</div>
+  <div class="soundtag kr" id="soundTag">아</div>
+</div>
+
+<div class="card"><p id="mnText"></p><div class="note" id="note" style="display:none"></div></div>
+
+<div class="acts">
+  <button id="say">🔊 Hear it</button>
+  <button id="next">Next →</button>
+</div>
+
+<div class="secthead">COMBINED · TWO YOU ALREADY KNOW, GLUED TOGETHER</div>
+<div class="row" id="compoundPicker"></div>
+
+<a class="onward" href="01e-letter-check.html">✓ Finished the alphabet, now check it<small>ㄱㄴㄷ…ㅎ and ㅏㅑㅓ…ㅢ, all 40. See which ones actually stuck →</small></a>
+
+<div class="keys"><b>Space</b> hear it · <b>→</b> or <b>Enter</b> next vowel</div>
+
+<script src="assets/_vowels.js"></script>
+<script>
+var O='assets/img/obj/', V='assets/voice/';
+var ALL=VOWELS_BASIC.concat(VOWELS_COMPOUND);
+var A={};
+ALL.forEach(function(v){ var a=new Audio(V+v.sound+'.wav'); a.preload='auto'; A[v.sound]=a; });
+function play(id){ if(!id)return; var a=A[id]; if(!a)return;
+  for(var k in A) try{ A[k].pause(); A[k].currentTime=0; }catch(e){}
+  try{ a.currentTime=0; var p=a.play(); if(p&&p.catch) p.catch(function(){}); }catch(e){}
+}
+function byId(id){ return ALL.find(function(v){ return v.id===id; }); }
+function g(id){ return document.getElementById(id); }
+
+var cur=VOWELS_BASIC[0];
+var bp=g('basicPicker'), cp=g('compoundPicker');
+VOWELS_BASIC.forEach(function(v){
+  var b=document.createElement('button'); b.className='pick kr'; b.textContent=v.c; b.dataset.id=v.id;
+  b.onclick=function(){ cur=v; render(); play(v.sound); };
+  bp.appendChild(b);
+});
+VOWELS_COMPOUND.forEach(function(v){
+  var b=document.createElement('button'); b.className='pick kr'; b.textContent=v.c; b.dataset.id=v.id;
+  b.onclick=function(){ cur=v; render(); play(v.sound); };
+  cp.appendChild(b);
+});
+
+/* the syllable the way you would actually say it: ㅇ + vowel */
+var SYL={a:'아',ya:'야',eo:'어',yeo:'여',o:'오',yo:'요',u:'우',yu:'유',eu:'으',i:'이',
+ ae:'애',yae:'얘',e:'에',ye:'예',wa:'와',wae:'왜',oe:'외',wo:'워',we:'웨',wi:'위',ui:'의'};
+
+function render(){
+  var isCompound = VOWELS_COMPOUND.indexOf(cur) >= 0;
+  [].forEach.call(document.querySelectorAll('.pick'),function(b){
+    b.className='pick kr'+(b.dataset.id===cur.id?' on':''); });
+
+  g('bigLetter').textContent=cur.c;
+  g('soundTag').textContent=SYL[cur.id]||'';
+
+  var imgS=g('imgSingle'), imgL=g('imgL'), imgR=g('imgR'), plus=g('plus');
+  if(!isCompound){
+    imgS.style.display='block'; imgL.style.display='none'; imgR.style.display='none'; plus.className='plus';
+    imgS.className='single'; imgS.src=O+cur.obj+'.webp';
+    g('mnText').innerHTML=cur.mn||'';
+  } else {
+    imgS.style.display='none'; imgL.style.display='block'; imgR.style.display='block';
+    var pL=byId(cur.parts[0]), pR=byId(cur.parts[1]);
+    imgL.src=O+pL.obj+'.webp'; imgR.src=O+pR.obj+'.webp';
+    imgL.className='partL'; imgR.className='partR'; plus.className='plus show';
+    g('mnText').innerHTML='<span class="kr">'+pL.c+'</span> + <span class="kr">'+pR.c+
+      '</span>: say them fast, one after another, and they blend into <b class="kr">'+cur.c+'</b>.';
+    setTimeout(function(){
+      imgL.className='partL merged'; imgR.className='partR merged'; plus.className='plus';
+    },550);
+  }
+  var note=g('note');
+  if(cur.note){ note.style.display='block'; note.textContent=cur.note; } else note.style.display='none';
+  setTimeout(function(){ play(cur.sound); },isCompound?750:200);
+}
+
+g('say').onclick=function(){ play(cur.sound); };
+g('next').onclick=function(){
+  var i=ALL.indexOf(cur); cur=ALL[(i+1)%ALL.length]; render();
+};
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight'||e.key==='Enter'){ e.preventDefault(); g('next').click(); }
+  if(e.key===' '){ e.preventDefault(); play(cur.sound); }
+});
+render();
+</script>
+
+<script src="assets/_progress.js"></script>
+<script>
+Progress.visit('01d');
+/* 다음 화면으로 넘어가는 큰 링크를 누르면 그 화면을 끝낸 것으로 본다 */
+document.addEventListener('click',function(e){
+  var t=e.target; while(t&&t!==document){ if(t.classList&&t.classList.contains('onward')){ Progress.done('01d'); break; } t=t.parentNode; }
+},true);
+</script>
+</body>
+</html>

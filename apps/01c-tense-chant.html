@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Tense-Consonant Chant</title>
+<style>
+:root{
+  --bg:#f7efdd; --card:#fffdf6; --ink:#221c14; --muted:#6b6353; --line:#221c14;
+  --blue:#1d5fa9; --orange:#d46508; --green:#2c7a57; --red:#bf3b2e;
+  --amber:#f7f1dc; --sh:4px 4px 0 var(--line);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{color:var(--ink);background-color:var(--bg);
+  background-image:radial-gradient(rgba(120,90,40,.05) 1px,transparent 1.3px),
+    radial-gradient(rgba(255,255,255,.5) 1.4px,transparent 1.6px);
+  background-size:26px 26px,34px 34px;
+  font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+  font-size:17px;line-height:1.45;display:flex;flex-direction:column;align-items:center;
+  padding:18px 14px 26px;min-height:100%}
+.kr{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;font-weight:800}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:5px;z-index:90;pointer-events:none;
+  background:repeating-linear-gradient(90deg,#a8524e 0 44px,#f3ecd9 44px 47px,#c9973f 47px 91px,
+   #f3ecd9 91px 94px,#41678f 94px 138px,#f3ecd9 138px 141px,#4f7d62 141px 185px,#f3ecd9 185px 188px,
+   #6f5590 188px 232px,#f3ecd9 232px 235px);opacity:.85}
+.wrap{width:100%;max-width:560px}
+.appbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-2px 0 12px}
+.appbar a,.appbar button{font:inherit;font-weight:800;font-size:14px;text-decoration:none;
+  color:var(--muted);background:transparent;border:0;box-shadow:none;padding:7px 10px;
+  min-height:40px;display:inline-flex;align-items:center;gap:6px;border-radius:10px;cursor:pointer}
+.appbar a:hover,.appbar button:hover{background:rgba(0,0,0,.055);color:var(--ink)}
+.ab-home{border:2px solid var(--line)!important;color:var(--ink)!important;background:var(--card)!important;
+  box-shadow:2px 2px 0 var(--line)!important}
+.ab-home:active{transform:translate(2px,2px)!important;box-shadow:none!important}
+.ab-step{background:#a63a2e;color:#fbf3e4;font-size:12px;font-weight:800;letter-spacing:.1em;
+  padding:5px 9px;border-radius:7px;box-shadow:inset 0 0 0 2px rgba(251,243,228,.55);margin-left:2px}
+.ab-right{margin-left:auto;display:flex;gap:2px;align-items:center}
+.ab-arrow{font-size:19px;line-height:1;padding:7px 13px}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:4px}
+
+.topbar{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.seal{min-width:38px;height:38px;padding:0 7px;border-radius:9px;background:#a63a2e;color:#fbf3e4;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;
+  box-shadow:inset 0 0 0 2.2px rgba(251,243,228,.55);flex:0 0 auto}
+.title{font-weight:800;font-size:16px;line-height:1.2}
+.title small{display:block;color:var(--muted);font-weight:700;font-size:12.5px}
+
+.stage{position:relative;width:100%;aspect-ratio:1/1;border:3px solid var(--line);border-radius:22px;
+  box-shadow:var(--sh);background:var(--card);overflow:hidden;cursor:pointer}
+.stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .4s ease}
+.stage img.hide{opacity:0}
+.wordcard{position:absolute;left:12px;right:12px;bottom:12px;background:rgba(255,253,246,.94);
+  border-radius:14px;padding:12px 16px;box-shadow:2px 2px 0 var(--line);border:3px solid var(--line)}
+.wordcard .kw{font-size:34px;line-height:1.15;text-align:center}
+.wordcard .kw .to{color:var(--red)}
+.wordcard .we{text-align:center;color:var(--muted);font-weight:700;font-size:13.5px;margin-top:3px}
+
+.cap{margin-top:14px;background:var(--card);border:3px solid var(--line);border-radius:16px;
+  box-shadow:var(--sh);padding:14px 16px;min-height:88px;font-size:clamp(16px,3.6vw,19px);font-weight:600}
+.cap .hint{display:block;color:var(--muted);font-weight:700;font-size:13px;margin-top:6px}
+.ctl{display:flex;gap:10px;margin-top:12px}
+button{font:inherit;font-weight:800;cursor:pointer;border:3px solid var(--line);background:var(--card);
+  color:var(--ink);border-radius:13px;padding:12px 16px;min-height:52px;box-shadow:2px 2px 0 var(--line)}
+button:active{transform:translate(2px,2px);box-shadow:none}
+#next{flex:1;background:var(--orange);color:#fff;font-size:18px}
+
+.five{display:flex;gap:6px;margin-top:12px}
+.fi{flex:1;border:3px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;
+  padding:8px 2px;text-align:center;box-shadow:2px 2px 0 var(--line)}
+button.fi{font:inherit}
+.fi.on{background:var(--amber)}
+.fi .c{font-size:24px;line-height:1.1}
+.fi .s{font-size:11px;color:var(--muted);font-weight:800}
+
+.recap{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.rc{border:3px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card);cursor:pointer;
+  aspect-ratio:1/1;position:relative}
+.rc img{width:100%;height:100%;object-fit:cover}
+.rc span{position:absolute;left:4px;bottom:3px;background:#a63a2e;color:#fbf3e4;border-radius:6px;
+  padding:1px 6px;font-size:15px;font-weight:800}
+.onward{display:block;margin-top:14px;text-align:center;background:var(--card);border:3px solid var(--line);
+  border-radius:15px;padding:14px;font-weight:800;text-decoration:none;color:var(--ink);box-shadow:var(--sh)}
+.onward small{display:block;color:var(--muted);font-weight:700;font-size:13px;margin-top:2px}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
+</style>
+<link rel="stylesheet" href="assets/_ui.css">
+</head>
+<body>
+<div class="wrap">
+
+<nav class="appbar">
+  <a class="ab-home" href="index.html">‹ All apps</a>
+  <span class="ab-step">01 · TENSE</span>
+  <span class="ab-right">
+    <a class="ab-arrow" href="01b-consonant-sounds.html" title="Previous: Round 2" aria-label="Previous">‹</a>
+    <a class="ab-arrow" href="01d-vowels.html" title="Next: Vowels" aria-label="Next">›</a>
+  </span>
+</nav>
+
+  <div class="topbar">
+    <div class="seal">ㄲㄸㅃㅆㅉ</div>
+    <div class="title">The Tense-Consonant Chant<small>one real phrase, re-said with every consonant tensed</small></div>
+  </div>
+
+  <div class="stage" id="stage">
+    <img id="img" src="assets/img/obj/mn-ss-shells.webp" alt="Twin objects standing for the doubled letter">
+    <div class="wordcard">
+      <div class="kw kr" id="kw">바닷속 조개</div>
+      <div class="we" id="we">a clam in the sea</div>
+    </div>
+  </div>
+
+  <div class="cap" id="cap">Tap the picture and listen, then tap again to hear it a much <b>tenser</b> way.
+    <span class="hint">Same phrase. Every consonant squeezed tight.</span></div>
+
+  <div class="five" id="five"></div>
+
+  <div class="ctl">
+    <button id="again">↻</button>
+    <button id="next">Tap to continue →</button>
+  </div>
+
+  <a class="onward" href="01d-vowels.html">Next → The 21 vowels<small>You have the consonants. Now the other half of every block.</small></a>
+</div>
+
+<div class="keys"><b>Space</b> hear it again · <b>→</b> or <b>Enter</b> continue · <b>←</b> back</div>
+
+<script src="assets/_articulation.js"></script>
+<script>
+var O='assets/img/obj/', V='assets/voice/';
+
+/* the chant, syllable by syllable, in the order the word actually says them */
+var CHANT=[
+  { s:'빠', c:'ㅃ', img:'mn-pp-buckets', sound:'sound-pp' },
+  { s:'따', c:'ㄸ', img:'mn-tt-doors',   sound:'sound-tt' },
+  { s:'쏙', c:'ㅆ', img:'mn-ss-shells',  sound:'sound-ss' },
+  { s:'쪼', c:'ㅉ', img:'mn-jj-jugs',    sound:'sound-jj' },
+  { s:'깨', c:'ㄲ', img:'mn-kk-guns',    sound:'sound-kk' }
+];
+var STEPS=['open','tense'].concat(CHANT.map(function(_,i){return 'letter'+i;})).concat(['recap']);
+
+var A={};
+['chant-word','chant-tense'].concat(CHANT.map(function(x){return x.sound;})).forEach(function(id){
+  var a=new Audio(V+id+'.wav'); a.preload='auto'; A[id]=a;
+});
+var unlocked=false;
+function unlock(){ if(unlocked)return; unlocked=true;
+  for(var k in A){ (function(a){ try{ var p=a.play(); if(p&&p.then) p.then(function(){a.pause();a.currentTime=0;}).catch(function(){}); }catch(e){} })(A[k]); } }
+function play(id){ if(!id)return; var a=A[id]; if(!a)return;
+  for(var k in A) try{ A[k].pause(); A[k].currentTime=0; }catch(e){}
+  try{ a.currentTime=0; var p=a.play(); if(p&&p.catch) p.catch(function(){}); }catch(e){}
+}
+
+var i=0;
+function g(id){ return document.getElementById(id); }
+var img=g('img'), kw=g('kw'), we=g('we'), cap=g('cap'), five=g('five');
+
+CHANT.forEach(function(x,idx){
+  var b=document.createElement('button');
+  b.className='fi'; b.dataset.i=idx;
+  b.innerHTML='<div class="c kr">'+x.c+'</div><div class="s kr">'+x.s+'</div>';
+  b.onclick=function(ev){ ev.stopPropagation(); unlock(); i=2+idx; render(); };
+  five.appendChild(b);
+});
+
+function render(){
+  var step=STEPS[i];
+  [].forEach.call(five.children,function(el,idx){ el.className='fi'+(2+idx===i?' on':''); });
+  g('next').textContent = (i===STEPS.length-1) ? '↻ Start over' : 'Tap to continue →';
+
+  if(step==='open'){
+    img.src=O+'mn-ss-shells.webp'; img.className='';
+    kw.innerHTML='바닷속 조개'; we.textContent='a clam in the sea';
+    cap.innerHTML='Tap the picture and listen, then tap again to hear it a much <b>tenser</b> way.'+
+      '<span class="hint">Same phrase. Every consonant squeezed tight.</span>';
+    setTimeout(function(){ play('chant-word'); },250);
+    return;
+  }
+  if(step==='tense'){
+    img.src=O+'mn-ss-shells.webp'; img.className='';
+    kw.innerHTML='<span class="to">빠</span><span class="to">따</span><span class="to">쏙</span>'+
+                 '<span class="to">쪼</span><span class="to">깨</span>';
+    we.textContent='every consonant, tensed';
+    cap.innerHTML='<b class="kr">빠따쏙쪼깨</b>: say it fast, like a tongue-twister.'+
+      '<span class="hint">ㅃ · ㄸ · ㅆ · ㅉ · ㄲ, in that order. Tap any tile below to meet one up close.</span>';
+    setTimeout(function(){ play('chant-tense'); },250);
+    return;
+  }
+  if(step==='recap'){
+    img.className='hide';
+    kw.innerHTML='ㅃㄸㅆㅉㄲ';
+    we.textContent='the chant order: the official alphabetical order is ㄲㄸㅃㅆㅉ';
+    cap.innerHTML='All five, side by side. The chant order and the alphabet order are different:'+
+      ' both are shown so you never mix them up.'+
+      '<span class="hint">Round 2 already showed you these as the “tense” member of each trio.</span>';
+    return;
+  }
+  var idx=parseInt(step.replace('letter',''),10), x=CHANT[idx];
+  img.src=O+x.img+'.webp'; img.className='';
+  kw.innerHTML='<span class="to">'+x.s+'</span>';
+  we.textContent=x.c+': the tense version';
+  cap.innerHTML='Twin '+x.img.split('-').slice(2).join(' ')+': the doubled letter, a doubled object.'+
+    '<span class="hint">Tap the picture to hear it again.</span>';
+  setTimeout(function(){ play(x.sound); },250);
+}
+
+g('next').onclick=function(e){ e.stopPropagation(); unlock(); i=(i+1)%STEPS.length; render(); };
+g('again').onclick=function(e){ e.stopPropagation(); unlock(); render(); };
+g('stage').onclick=function(){
+  unlock();
+  var step=STEPS[i];
+  if(step==='open') play('chant-word');
+  else if(step==='tense') play('chant-tense');
+  else if(step.indexOf('letter')===0) play(CHANT[parseInt(step.replace('letter',''),10)].sound);
+  else g('next').click();
+};
+document.addEventListener('keydown',function(e){
+  if(e.key===' '){ e.preventDefault(); unlock(); g('again').click(); return; }
+  if(e.key==='ArrowRight'||e.key==='Enter'){ e.preventDefault(); g('next').click(); }
+  if(e.key==='ArrowLeft'){ unlock(); i=(i-1+STEPS.length)%STEPS.length; render(); }
+});
+render();
+</script>
+
+<script src="assets/_progress.js"></script>
+<script>
+Progress.visit('01c');
+/* 다음 화면으로 넘어가는 큰 링크를 누르면 그 화면을 끝낸 것으로 본다 */
+document.addEventListener('click',function(e){
+  var t=e.target; while(t&&t!==document){ if(t.classList&&t.classList.contains('onward')){ Progress.done('01c'); break; } t=t.parentNode; }
+},true);
+</script>
+</body>
+</html>

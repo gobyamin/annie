@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Picture Match</title>
+<style>
+:root{
+  /* hanji paper and meok ink */
+  --bg:#f7efdd; --card:#fffdf6; --ink:#221c14; --muted:#6b6353; --line:#221c14;
+  /* obangsaek-leaning accents: 청 홍 황 녹 자 */
+  --blue:#1d5fa9; --orange:#d46508; --green:#2c7a57; --red:#bf3b2e; --purple:#6d3fae;
+  /* tinted hanji surfaces */
+  --sky:#eef2f7; --mint:#edf2ec; --blush:#f7ece7; --amber:#f7f1dc; --paper2:#fbf7ec;
+  --hair:#ded2b8;
+  /* depth */
+  --sh:4px 4px 0 var(--line); --sh1:2px 2px 0 var(--line);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  font-size:17px;line-height:1.45;padding:18px 14px 30px;max-width:1000px;margin:0 auto}
+.kr{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;font-weight:800;word-break:keep-all}
+h1{font-size:clamp(20px,4.4vw,30px);margin:0;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:14px;margin-top:2px}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+button{font:inherit;font-weight:700;cursor:pointer;border:3px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:12px;padding:10px 14px;min-height:46px;box-shadow:2px 2px 0 var(--line);transition:transform .06s,box-shadow .06s}
+button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--line)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.chips button{border-radius:999px;padding:9px 15px;min-height:44px;font-size:15px}
+.chips button.on{background:var(--purple);color:#fff}
+.chips.small button{font-size:14px;padding:8px 13px;min-height:42px}
+.chips.small button.on{background:var(--blue)}
+.hud{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;align-items:center;font-weight:800;color:var(--muted);
+  font-size:15px;margin:6px 0 12px}
+.hud b{color:var(--ink);font-size:19px}
+.board{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
+.col{display:grid;gap:10px}
+.colhead{font-size:13px;font-weight:800;color:var(--muted);text-align:center;letter-spacing:.06em;margin-bottom:6px}
+.t{border:3px solid var(--line);border-radius:16px;background:var(--card);box-shadow:3px 3px 0 var(--line);
+  cursor:pointer;min-height:74px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;padding:8px 6px;text-align:center;transition:transform .08s,opacity .3s,background .15s}
+.t .emo{font-size:clamp(30px,7.5vw,44px);line-height:1}
+.t .w{font-size:clamp(23px,5.6vw,36px);line-height:1.1}
+.t .r{font-size:11px;color:var(--muted);font-weight:800}
+.hide-rom .t .r{display:none}
+.t.sel{background:var(--blue);color:#fff;transform:translate(2px,2px);box-shadow:2px 2px 0 var(--line)}
+.t.sel .r{color:#dbe6ff}
+.t.gone{opacity:.2;pointer-events:none;background:#e7e2d6;box-shadow:none;border-style:dashed}
+.t.bad{animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.learned{margin-top:16px;background:var(--card);border:3px solid var(--line);border-radius:18px;box-shadow:var(--sh);padding:14px}
+.learned h3{margin:0 0 8px;font-size:15px;color:var(--muted);letter-spacing:.05em}
+.lrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:2px dotted #ddd6c6;flex-wrap:wrap}
+.lrow:last-child{border-bottom:0}
+.lrow .e{font-size:28px}
+.lrow .k{font-size:clamp(20px,4.4vw,26px)}
+.lrow .en{color:var(--muted);font-weight:800;font-size:15px}
+.lrow button{margin-left:auto;min-height:40px;padding:6px 12px;font-size:14px}
+.done{text-align:center;font-size:clamp(22px,5vw,32px);font-weight:800;color:var(--green);margin:12px 0}
+.warn{display:none;background:#ffe8e8;border:3px solid var(--red);border-radius:14px;padding:10px 14px;font-weight:700;margin-bottom:12px;font-size:15px}
+body.no-voice .warn{display:block}
+.foot{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
+/* --- shared chrome: nav bar, focus, motion, pack loader --- */
+.appbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-2px 0 14px}
+.appbar a,.appbar button{font:inherit;font-weight:800;font-size:14px;text-decoration:none;
+  color:var(--muted);background:transparent;border:0;box-shadow:none;padding:7px 10px;
+  min-height:40px;display:inline-flex;align-items:center;gap:6px;border-radius:10px;cursor:pointer;transition:none}
+.appbar a:hover,.appbar button:hover{background:rgba(0,0,0,.055);color:var(--ink)}
+.appbar a:active,.appbar button:active{transform:none;box-shadow:none}
+.ab-home{border:2px solid var(--line)!important;color:var(--ink)!important;background:var(--card)!important;
+  box-shadow:2px 2px 0 var(--line)!important}
+.ab-home:active{transform:translate(2px,2px)!important;box-shadow:none!important}
+.ab-step{background:#a63a2e;color:#fbf3e4;font-size:12px;font-weight:800;letter-spacing:.12em;
+  padding:5px 9px;border-radius:7px;box-shadow:inset 0 0 0 2px rgba(251,243,228,.55);margin-left:2px}
+.ab-right{margin-left:auto;display:flex;gap:2px;align-items:center}
+.ab-arrow{font-size:19px;line-height:1;padding:7px 13px}
+.ab-arrow[aria-disabled="true"]{opacity:.25;pointer-events:none}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:4px}
+@keyframes pop{0%{transform:scale(.94)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
+.pop{animation:pop .22s ease-out}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+#abov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(18,18,24,.55);z-index:70;
+  display:none;align-items:center;justify-content:center;padding:14px}
+#abov.on{display:flex}
+#abbox label{display:block;font-weight:800;font-size:14px;margin:14px 0 6px}
+#abbox select,#abbox input[type=range]{width:100%;font:inherit;font-weight:700;
+  border:3px solid var(--line);border-radius:12px;padding:10px;background:var(--card);min-height:46px}
+#abbox input[type=range]{padding:0;height:46px}
+.abhint{font-size:14px;color:var(--muted);margin-top:6px}
+/* --- hanji paper + saekdong band --- */
+body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(rgba(120,90,40,.055) 1px,transparent 1.3px),
+    radial-gradient(rgba(120,90,40,.04) 1px,transparent 1.3px),
+    radial-gradient(rgba(255,255,255,.5) 1.4px,transparent 1.6px);
+  background-size:26px 26px,42px 42px,34px 34px;
+  background-position:0 0,13px 21px,7px 3px;
+}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:5px;z-index:90;pointer-events:none;
+  background:repeating-linear-gradient(90deg,
+    #a8524e 0 44px,#f3ecd9 44px 47px,
+    #c9973f 47px 91px,#f3ecd9 91px 94px,
+    #41678f 94px 138px,#f3ecd9 138px 141px,
+    #4f7d62 141px 185px,#f3ecd9 185px 188px,
+    #6f5590 188px 232px,#f3ecd9 232px 235px);
+  opacity:.85}
+</style>
+<link rel="stylesheet" href="assets/_ui.css">
+</head>
+<body>
+
+<nav class="appbar">
+  <a class="ab-home" href="index.html">‹ All apps</a>
+  <span class="ab-step">05 / 10</span>
+  <span class="ab-right">
+    <a class="ab-arrow" href="04-listen-and-choose.html" title="Previous app" aria-label="Previous app">‹</a>
+    <a class="ab-arrow" href="06-number-machine.html" title="Next app" aria-label="Next app">›</a>
+    <button id="abSet" title="Voice settings" aria-label="Voice settings">🔊</button>
+  </span>
+</nav>
+
+<div class="warn">🔇 No Korean voice on this device: the 🔊 buttons will be silent. The teacher can read each word aloud instead.</div>
+
+<header>
+  <div class="seal">05</div>
+  <div style="flex:1;min-width:200px">
+    <h1>Picture Match</h1>
+    <div class="sub">Tap a picture, then tap its Korean word.</div>
+  </div>
+  <div><button id="romBtn">Aa Romanization: OFF</button></div>
+</header>
+
+<div class="chips" id="cats"></div>
+<div class="chips small" id="sizes"></div>
+
+<div class="hud">
+  <span>Matched <b id="hm">0</b> / <b id="ht">0</b></span>
+  <span>Tries <b id="hg">0</b></span>
+  <span>Time <b id="hc">0:00</b></span>
+  <button id="newg" style="min-height:40px;padding:7px 14px;font-size:14px">↻ New round</button>
+</div>
+
+<div id="stage"></div>
+<div class="learned" id="learned" style="display:none"><h3>WORDS YOU MATCHED</h3><div id="llist"></div></div>
+
+<div class="foot">Say each word out loud as you match it.</div>
+
+<script src="_pack.js"></script>
+<script>
+var PACK=(function(){
+  var d=(window.STUDENT_PACK&&typeof window.STUDENT_PACK==='object')?window.STUDENT_PACK:null;
+  function val(k){var v=d&&d[k];if(v==null)return null;if(Array.isArray(v)&&!v.length)return null;return v;}
+  return{data:d,src:d?(d.student||'pack'):'',live:!!d,
+    get:function(k,fb){var v=val(k);return v===null?fb:v;},
+    has:function(k){return val(k)!==null;}};
+})();
+function groupBy(list,def){
+  var order=[],map={};
+  list.forEach(function(it){var g=it.group||def;if(!map[g]){map[g]=[];order.push(g);}map[g].push(it);});
+  return order.map(function(g){return{name:g,items:map[g]};});
+}
+var TTS=(function(){
+  var voices=[], voice=null, pref=null, mult=1;
+  try{var s=JSON.parse(localStorage.getItem('ktts')||'{}');pref=s.voice||null;mult=+s.rate||1;}catch(e){}
+  function save(){try{localStorage.setItem('ktts',JSON.stringify({voice:pref,rate:mult}));}catch(e){}}
+  function korean(){return voices.filter(function(v){return /^ko/i.test(v.lang||'')||/korean|한국/i.test(v.name||'');});}
+  function pick(){
+    voices=(window.speechSynthesis&&speechSynthesis.getVoices())||[];
+    var ks=korean(); voice=null;
+    if(pref) for(var i=0;i<ks.length;i++) if(ks[i].name===pref) voice=ks[i];
+    if(!voice) voice=ks[0]||null;
+    document.body.classList.toggle('no-voice',!voice);
+    if(window.__voicesChanged) window.__voicesChanged(ks,voice);
+  }
+  if(window.speechSynthesis){pick();speechSynthesis.onvoiceschanged=pick;setTimeout(pick,600);}
+  else document.body.classList.add('no-voice');
+  function utt(t,r){
+    var u=new SpeechSynthesisUtterance(t);
+    u.lang='ko-KR'; u.rate=Math.max(.1,Math.min(2,(r||0.82)*mult));
+    if(voice)u.voice=voice; return u;
+  }
+  return {
+    say:function(t,r){if(!window.speechSynthesis||!t)return;
+      try{speechSynthesis.cancel();}catch(e){} speechSynthesis.speak(utt(t,r));},
+    queue:function(list,r){if(!window.speechSynthesis||!list||!list.length)return;
+      try{speechSynthesis.cancel();}catch(e){} list.forEach(function(t){speechSynthesis.speak(utt(t,r));});},
+    voices:korean, current:function(){return voice;},
+    setVoice:function(n){pref=n;pick();save();},
+    rate:function(x){if(x!=null){mult=x;save();} return mult;}
+  };
+})();
+
+function v(g,k,r,en,e){return {group:g,k:k,r:r,en:en,e:e};}
+var BUILTIN=[
+ v('🍎 Food','사과','sa-gwa','apple','🍎'),v('🍎 Food','물','mul','water','💧'),
+ v('🍎 Food','밥','bap','rice / a meal','🍚'),v('🍎 Food','김치','gim-chi','kimchi','🥬'),
+ v('🍎 Food','우유','u-yu','milk','🥛'),v('🍎 Food','고기','go-gi','meat','🥩'),
+ v('🍎 Food','빵','ppang','bread','🍞'),v('🍎 Food','달걀','dal-gyal','egg','🥚'),
+ v('🍎 Food','라면','ra-myeon','ramyeon','🍜'),v('🍎 Food','과일','gwa-il','fruit','🍇'),
+ v('🍎 Food','생선','saeng-seon','fish (food)','🐟'),v('🍎 Food','차','cha','tea','🍵'),
+
+ v('🐶 Animals','개','gae','dog','🐕'),v('🐶 Animals','고양이','go-yang-i','cat','🐈'),
+ v('🐶 Animals','새','sae','bird','🐦'),v('🐶 Animals','물고기','mul-go-gi','fish','🐠'),
+ v('🐶 Animals','말','mal','horse','🐴'),v('🐶 Animals','소','so','cow','🐄'),
+ v('🐶 Animals','돼지','dwae-ji','pig','🐖'),v('🐶 Animals','닭','dak','chicken','🐔'),
+ v('🐶 Animals','곰','gom','bear','🐻'),v('🐶 Animals','토끼','to-kki','rabbit','🐇'),
+ v('🐶 Animals','호랑이','ho-rang-i','tiger','🐅'),v('🐶 Animals','벌','beol','bee','🐝'),
+
+ v('🏠 Places','집','jip','house, home','🏠'),v('🏠 Places','학교','hak-gyo','school','🏫'),
+ v('🏠 Places','회사','hoe-sa','company, office','🏢'),v('🏠 Places','병원','byeong-won','hospital','🏥'),
+ v('🏠 Places','은행','eun-haeng','bank','🏦'),v('🏠 Places','식당','sik-dang','restaurant','🍽️'),
+ v('🏠 Places','화장실','hwa-jang-sil','toilet','🚻'),v('🏠 Places','공원','gong-won','park','🌳'),
+ v('🏠 Places','시장','si-jang','market','🧺'),v('🏠 Places','역','yeok','station','🚉'),
+ v('🏠 Places','가게','ga-ge','shop','🏪'),v('🏠 Places','바다','ba-da','sea','🌊'),
+
+ v('🎒 Things','책','chaek','book','📖'),v('🎒 Things','의자','ui-ja','chair','🪑'),
+ v('🎒 Things','시계','si-gye','clock, watch','⌚'),v('🎒 Things','가방','ga-bang','bag','👜'),
+ v('🎒 Things','옷','ot','clothes','👕'),v('🎒 Things','신발','sin-bal','shoes','👟'),
+ v('🎒 Things','돈','don','money','💰'),v('🎒 Things','전화','jeon-hwa','phone','📞'),
+ v('🎒 Things','열쇠','yeol-soe','key','🔑'),v('🎒 Things','우산','u-san','umbrella','☂️'),
+ v('🎒 Things','창문','chang-mun','window','🪟'),v('🎒 Things','문','mun','door','🚪'),
+
+ v('🙋 People & Body','사람','sa-ram','person','🧍'),v('🙋 People & Body','친구','chin-gu','friend','👭'),
+ v('🙋 People & Body','선생님','seon-saeng-nim','teacher','🧑‍🏫'),v('🙋 People & Body','학생','hak-saeng','student','🧑‍🎓'),
+ v('🙋 People & Body','아기','a-gi','baby','👶'),v('🙋 People & Body','손','son','hand','🖐️'),
+ v('🙋 People & Body','발','bal','foot','🦶'),v('🙋 People & Body','눈','nun','eye','👁️'),
+ v('🙋 People & Body','입','ip','mouth','👄'),v('🙋 People & Body','귀','gwi','ear','👂'),
+ v('🙋 People & Body','머리','meo-ri','head','🧠'),v('🙋 People & Body','코','ko','nose','👃'),
+
+ v('🏃 Actions','먹다','meok-da','to eat','🍽️'),v('🏃 Actions','마시다','ma-si-da','to drink','🥤'),
+ v('🏃 Actions','가다','ga-da','to go','🚶'),v('🏃 Actions','오다','o-da','to come','👋'),
+ v('🏃 Actions','보다','bo-da','to see, watch','👀'),v('🏃 Actions','자다','ja-da','to sleep','😴'),
+ v('🏃 Actions','읽다','ik-da','to read','📚'),v('🏃 Actions','쓰다','sseu-da','to write','✍️'),
+ v('🏃 Actions','사다','sa-da','to buy','🛒'),v('🏃 Actions','만나다','man-na-da','to meet','🤝'),
+ v('🏃 Actions','듣다','deut-da','to listen','🎧'),v('🏃 Actions','일하다','il-ha-da','to work','💼')
+];
+
+var GROUPS=groupBy(PACK.get('vocab',BUILTIN),'🧩 Words');
+var gi=0, size=6, pairs=[], left=[], right=[], selL=null, selR=null,
+    matched=0, tries=0, t0=0, timer=null, showRom=false, learned=[], locked=false;
+
+var catsEl=document.getElementById('cats');
+GROUPS.forEach(function(g,i){
+  var b=document.createElement('button'); b.textContent=g.name;
+  b.onclick=function(){ gi=i; start(); }; catsEl.appendChild(b);
+});
+if(GROUPS.length<2) catsEl.style.display='none';
+var szEl=document.getElementById('sizes');
+[4,6,8].forEach(function(n){
+  var b=document.createElement('button'); b.textContent=n+' pairs'; b.dataset.n=n;
+  b.onclick=function(){ size=n; start(); }; szEl.appendChild(b);
+});
+
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+function start(){
+  [].forEach.call(catsEl.children,function(b,i){b.className=i===gi?'on':'';});
+  [].forEach.call(szEl.children,function(b){b.className=+b.dataset.n===size?'on':'';});
+  var pool=GROUPS[gi].items;
+  pairs=shuffle(pool.slice()).slice(0,Math.min(size,pool.length));
+  pairs.forEach(function(p){p.done=false;});
+  left=shuffle(pairs.slice()); right=shuffle(pairs.slice());
+  selL=null; selR=null; matched=0; tries=0; learned=[]; locked=false;
+  document.getElementById('learned').style.display='none';
+  document.getElementById('llist').innerHTML='';
+  clearInterval(timer); t0=new Date().getTime();
+  timer=setInterval(tick,1000); tick();
+  render();
+}
+function tick(){
+  var s=Math.floor((new Date().getTime()-t0)/1000);
+  document.getElementById('hc').textContent=Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);
+}
+function render(){
+  document.body.classList.toggle('hide-rom',!showRom);
+  document.getElementById('hm').textContent=matched;
+  document.getElementById('ht').textContent=pairs.length;
+  document.getElementById('hg').textContent=tries;
+
+  var st=document.getElementById('stage');
+  st.innerHTML='<div class="board">'+
+    '<div><div class="colhead">PICTURE</div><div class="col" id="colL"></div></div>'+
+    '<div><div class="colhead">KOREAN</div><div class="col" id="colR"></div></div></div>';
+  var cl=document.getElementById('colL'), cr=document.getElementById('colR');
+
+  left.forEach(function(it){
+    var d=document.createElement('div');
+    d.className='t'+(it.done?' gone':'')+(selL===it?' sel':'');
+    d.innerHTML='<div class="emo">'+(it.e||'🔤')+'</div>'+(it.done?'<div class="r">'+(it.en||'')+'</div>':'');
+    d.onclick=function(){ if(locked||it.done)return; selL=(selL===it?null:it); check(); };
+    it._l=d; cl.appendChild(d);
+  });
+  right.forEach(function(it){
+    var d=document.createElement('div');
+    d.className='t'+(it.done?' gone':'')+(selR===it?' sel':'');
+    d.innerHTML='<div class="w kr">'+it.k+'</div><div class="r">'+(it.r||'')+'</div>';
+    d.onclick=function(){ if(locked||it.done)return; selR=(selR===it?null:it); TTS.say(it.k); check(); };
+    it._r=d; cr.appendChild(d);
+  });
+
+  if(matched===pairs.length && pairs.length){
+    clearInterval(timer);
+    var s=Math.floor((new Date().getTime()-t0)/1000);
+    st.insertAdjacentHTML('beforeend','<div class="done">🎉 All matched! '+tries+' tries · '+
+      Math.floor(s/60)+':'+('0'+(s%60)).slice(-2)+'</div>');
+  }
+}
+function check(){
+  if(!selL||!selR){ render(); return; }
+  tries++;
+  var a=selL, b=selR;
+  if(a===b){
+    a.done=true; matched++; learned.push(a); showLearned();
+    selL=null; selR=null; render(); TTS.say(a.k);
+  }else{
+    render();
+    if(a._l) a._l.className+=' bad';
+    if(b._r) b._r.className+=' bad';
+    locked=true;
+    setTimeout(function(){ selL=null; selR=null; locked=false; render(); },450);
+  }
+}
+function showLearned(){
+  var box=document.getElementById('learned'), list=document.getElementById('llist');
+  box.style.display='block'; list.innerHTML='';
+  learned.forEach(function(it){
+    var d=document.createElement('div'); d.className='lrow';
+    d.innerHTML='<span class="e">'+(it.e||'🔤')+'</span><span class="k kr">'+it.k+'</span>'+
+      '<span class="en">'+(it.r||'')+' &nbsp;·&nbsp; '+(it.en||'')+'</span>';
+    var b=document.createElement('button'); b.textContent='🔊';
+    b.onclick=function(){TTS.say(it.k);};
+    d.appendChild(b); list.appendChild(d);
+  });
+}
+document.getElementById('romBtn').onclick=function(){
+  showRom=!showRom; this.textContent='Aa Romanization: '+(showRom?'ON':'OFF');
+  this.className=showRom?'on':''; render();
+};
+document.getElementById('newg').onclick=start;
+start();
+
+/* --- voice settings popover, shared by all ten apps --- */
+function mountChrome(){
+  var btn=document.getElementById('abSet'); if(!btn) return;
+  var ov=document.createElement('div'); ov.id='abov';
+  ov.innerHTML='<div id="abbox"><h2>🔊 Voice</h2>'+
+    '<p>Windows and macOS ship more than one Korean voice. Some are much clearer than others: try them.</p>'+
+    '<label for="abVoice">Korean voice</label><select id="abVoice"></select>'+
+    '<label for="abRate">Speed. <span id="abRateV">normal</span></label>'+
+    '<input type="range" id="abRate" min="0.5" max="1.3" step="0.05">'+
+    '<div class="abhint">Beginners follow about 30% slower than a native pace.</div>'+
+    '<div class="r"><button id="abTest">🔊 Test</button><button id="abClose">Done</button></div></div>';
+  document.body.appendChild(ov);
+  var sel=ov.querySelector('#abVoice'), rng=ov.querySelector('#abRate'), lab=ov.querySelector('#abRateV');
+  function label(v){return v<0.75?'slow':v<0.95?'a little slow':v<1.1?'normal':'fast';}
+  function fill(list,cur){
+    sel.innerHTML='';
+    if(!list||!list.length){
+      var o=document.createElement('option'); o.textContent='No Korean voice on this device'; o.disabled=true;
+      sel.appendChild(o); sel.disabled=true; return;
+    }
+    sel.disabled=false;
+    list.forEach(function(v){
+      var o=document.createElement('option'); o.value=v.name;
+      o.textContent=v.name+' ('+v.lang+')';
+      if(cur&&v.name===cur.name) o.selected=true;
+      sel.appendChild(o);
+    });
+  }
+  window.__voicesChanged=fill;
+  fill(TTS.voices(),TTS.current());
+  rng.value=TTS.rate(); lab.textContent=label(TTS.rate());
+  sel.onchange=function(){TTS.setVoice(this.value);TTS.say('안녕하세요');};
+  rng.oninput=function(){TTS.rate(+this.value);lab.textContent=label(+this.value);};
+  rng.onchange=function(){TTS.say('안녕하세요. 만나서 반가워요.');};
+  ov.querySelector('#abTest').onclick=function(){TTS.say('안녕하세요. 만나서 반가워요.');};
+  ov.querySelector('#abClose').onclick=function(){ov.className='';};
+  ov.onclick=function(e){if(e.target===ov)ov.className='';};
+  btn.onclick=function(){ov.className='on';};
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')ov.className='';});
+}
+
+mountChrome();
+</script>
+
+<script src="assets/_progress.js"></script>
+<script>
+Progress.visit('05');
+/* 다음 화면으로 넘어가는 큰 링크를 누르면 그 화면을 끝낸 것으로 본다 */
+document.addEventListener('click',function(e){
+  var t=e.target; while(t&&t!==document){ if(t.classList&&t.classList.contains('onward')){ Progress.done('05'); break; } t=t.parentNode; }
+},true);
+</script>
+</body>
+</html>

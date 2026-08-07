@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Particle Picker</title>
+<style>
+:root{
+  /* hanji paper and meok ink */
+  --bg:#f7efdd; --card:#fffdf6; --ink:#221c14; --muted:#6b6353; --line:#221c14;
+  /* obangsaek-leaning accents: 청 홍 황 녹 자 */
+  --blue:#1d5fa9; --orange:#d46508; --green:#2c7a57; --red:#bf3b2e; --purple:#6d3fae;
+  /* tinted hanji surfaces */
+  --sky:#eef2f7; --mint:#edf2ec; --blush:#f7ece7; --amber:#f7f1dc; --paper2:#fbf7ec;
+  --hair:#ded2b8;
+  /* depth */
+  --sh:4px 4px 0 var(--line); --sh1:2px 2px 0 var(--line);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  font-size:17px;line-height:1.45;padding:18px 14px 30px;max-width:1000px;margin:0 auto}
+.kr{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;font-weight:800;word-break:keep-all}
+h1{font-size:clamp(20px,4.4vw,30px);margin:0;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:14px;margin-top:2px}
+header{margin-bottom:10px}
+button{font:inherit;font-weight:700;cursor:pointer;border:3px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:12px;padding:10px 14px;min-height:46px;box-shadow:2px 2px 0 var(--line);transition:transform .06s,box-shadow .06s}
+button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--line)}
+.levels{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+.levels button{border-radius:999px;padding:9px 15px;min-height:44px;font-size:15px}
+.levels button.on{background:var(--purple);color:#fff}
+.panel{background:var(--card);border:3px solid var(--line);border-radius:22px;box-shadow:var(--sh);padding:20px 18px;margin-bottom:14px}
+.sentence{font-size:clamp(30px,7.4vw,54px);line-height:1.35;text-align:center}
+.blank{display:inline-block;min-width:1.6em;border-bottom:6px solid var(--orange);color:var(--orange)}
+.blank.filled{border-bottom-color:var(--line);color:var(--ink)}
+.blank.ok{color:var(--green);border-bottom-color:var(--green)}
+.blank.no{color:var(--red);border-bottom-color:var(--red)}
+.enline{text-align:center;color:var(--muted);font-weight:700;font-size:clamp(16px,3.4vw,21px);margin-top:10px}
+.opts{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));margin-top:20px}
+.opt{border:3px solid var(--line);border-radius:16px;background:var(--card);box-shadow:3px 3px 0 var(--line);
+  cursor:pointer;padding:14px 8px;text-align:center;font-size:clamp(30px,7vw,46px);line-height:1.1;min-height:82px;
+  display:flex;align-items:center;justify-content:center}
+.opt.right{background:#d9f5e6;border-color:var(--green)}
+.opt.wrong{background:#ffe0e0;border-color:var(--red)}
+.fb{margin-top:16px;font-size:clamp(17px,3.6vw,22px);font-weight:800;text-align:center;min-height:1.4em}
+.fb.ok{color:var(--green)} .fb.no{color:var(--red)}
+.why{margin-top:12px;background:#fff6d9;border:3px dashed var(--line);border-radius:14px;padding:12px 15px;
+  font-size:clamp(15px,3.1vw,18px);display:none}
+.why.show{display:block}
+.batchim{margin-top:10px;background:#eef3ff;border:3px solid var(--line);border-radius:14px;padding:11px 14px;
+  font-size:clamp(15px,3vw,18px);display:none}
+.batchim.show{display:block}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.acts button{flex:1 1 160px}
+#next{background:var(--orange)}
+.scorebar{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font-weight:800;color:var(--muted);font-size:15px;margin-top:12px}
+.scorebar b{color:var(--ink);font-size:19px}
+.rules{font-size:15px}
+.rules h3{margin:0 0 10px;font-size:17px}
+.rules table{width:100%;border-collapse:collapse}
+.rules td,.rules th{padding:8px 6px;border-bottom:2px solid #e6e0d2;text-align:left}
+.rules th{font-size:13px;color:var(--muted);letter-spacing:.05em}
+.rules .p{font-size:clamp(20px,4.4vw,26px)}
+.warn{display:none;background:#ffe8e8;border:3px solid var(--red);border-radius:14px;padding:10px 14px;font-weight:700;margin-bottom:12px;font-size:15px}
+body.no-voice .warn{display:block}
+.foot{margin-top:10px;color:var(--muted);font-size:13px;text-align:center}
+kbd{background:var(--card);border:2px solid var(--line);border-bottom-width:3px;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:800}
+/* --- shared chrome: nav bar, focus, motion, pack loader --- */
+.appbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-2px 0 14px}
+.appbar a,.appbar button{font:inherit;font-weight:800;font-size:14px;text-decoration:none;
+  color:var(--muted);background:transparent;border:0;box-shadow:none;padding:7px 10px;
+  min-height:40px;display:inline-flex;align-items:center;gap:6px;border-radius:10px;cursor:pointer;transition:none}
+.appbar a:hover,.appbar button:hover{background:rgba(0,0,0,.055);color:var(--ink)}
+.appbar a:active,.appbar button:active{transform:none;box-shadow:none}
+.ab-home{border:2px solid var(--line)!important;color:var(--ink)!important;background:var(--card)!important;
+  box-shadow:2px 2px 0 var(--line)!important}
+.ab-home:active{transform:translate(2px,2px)!important;box-shadow:none!important}
+.ab-step{background:#a63a2e;color:#fbf3e4;font-size:12px;font-weight:800;letter-spacing:.12em;
+  padding:5px 9px;border-radius:7px;box-shadow:inset 0 0 0 2px rgba(251,243,228,.55);margin-left:2px}
+.ab-right{margin-left:auto;display:flex;gap:2px;align-items:center}
+.ab-arrow{font-size:19px;line-height:1;padding:7px 13px}
+.ab-arrow[aria-disabled="true"]{opacity:.25;pointer-events:none}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:4px}
+@keyframes pop{0%{transform:scale(.94)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
+.pop{animation:pop .22s ease-out}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+#abov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(18,18,24,.55);z-index:70;
+  display:none;align-items:center;justify-content:center;padding:14px}
+#abov.on{display:flex}
+#abbox label{display:block;font-weight:800;font-size:14px;margin:14px 0 6px}
+#abbox select,#abbox input[type=range]{width:100%;font:inherit;font-weight:700;
+  border:3px solid var(--line);border-radius:12px;padding:10px;background:var(--card);min-height:46px}
+#abbox input[type=range]{padding:0;height:46px}
+.abhint{font-size:14px;color:var(--muted);margin-top:6px}
+/* --- hanji paper + saekdong band --- */
+body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(rgba(120,90,40,.055) 1px,transparent 1.3px),
+    radial-gradient(rgba(120,90,40,.04) 1px,transparent 1.3px),
+    radial-gradient(rgba(255,255,255,.5) 1.4px,transparent 1.6px);
+  background-size:26px 26px,42px 42px,34px 34px;
+  background-position:0 0,13px 21px,7px 3px;
+}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:5px;z-index:90;pointer-events:none;
+  background:repeating-linear-gradient(90deg,
+    #a8524e 0 44px,#f3ecd9 44px 47px,
+    #c9973f 47px 91px,#f3ecd9 91px 94px,
+    #41678f 94px 138px,#f3ecd9 138px 141px,
+    #4f7d62 141px 185px,#f3ecd9 185px 188px,
+    #6f5590 188px 232px,#f3ecd9 232px 235px);
+  opacity:.85}
+header{display:flex;flex-wrap:wrap;gap:11px;align-items:flex-start}
+</style>
+<link rel="stylesheet" href="assets/_ui.css">
+</head>
+<body>
+
+<nav class="appbar">
+  <a class="ab-home" href="index.html">‹ All apps</a>
+  <span class="ab-step">09 / 10</span>
+  <span class="ab-right">
+    <a class="ab-arrow" href="08-sentence-builder.html" title="Previous app" aria-label="Previous app">‹</a>
+    <a class="ab-arrow" href="10-verb-form-trainer.html" title="Next app" aria-label="Next app">›</a>
+    <button id="abSet" title="Voice settings" aria-label="Voice settings">🔊</button>
+  </span>
+</nav>
+
+<div class="warn">🔇 No Korean voice on this device: the 🔊 button will be silent. Read the sentence aloud together.</div>
+
+<header>
+  <div class="seal">09</div>
+  <div>
+  <h1>Particle Picker</h1>
+  <div class="sub">Korean glues a tiny word onto every noun. Pick the right one.</div>
+  </div>
+</header>
+
+<div class="levels" id="levels"></div>
+
+<div class="panel">
+  <div class="sentence kr" id="sentence"></div>
+  <div class="enline" id="enline"></div>
+  <div class="opts" id="opts"></div>
+  <div class="fb" id="fb"></div>
+  <div class="batchim" id="batchim"></div>
+  <div class="why" id="why"></div>
+  <div class="acts">
+    <button id="say">🔊 Hear the sentence</button>
+    <button id="next">Next →</button>
+  </div>
+  <div class="scorebar">
+    <span>Correct <b id="sc">0</b> / <b id="tt">0</b></span>
+    <span>Streak <b id="st">0</b> 🔥</span>
+  </div>
+</div>
+
+<div class="panel rules">
+  <h3>📋 The two rules that decide almost everything</h3>
+  <table>
+    <tr><th>Job</th><th>after a consonant (받침 ✓)</th><th>after a vowel (받침 ✗)</th></tr>
+    <tr><td>Topic: "as for…"</td><td class="kr p">은</td><td class="kr p">는</td></tr>
+    <tr><td>Subject: who/what does it</td><td class="kr p">이</td><td class="kr p">가</td></tr>
+    <tr><td>Object: what you do it to</td><td class="kr p">을</td><td class="kr p">를</td></tr>
+    <tr><td>Also, too</td><td class="kr p">도</td><td class="kr p">도</td></tr>
+  </table>
+  <div style="margin-top:14px;background:#eef3ff;border:3px solid var(--line);border-radius:14px;padding:12px 14px">
+    <b class="kr" style="font-size:20px">에</b> vs <b class="kr" style="font-size:20px">에서</b>: the one everybody mixes up:<br>
+    <span class="kr">에</span> = <b>to</b> a place, or <b>at</b> a time, or where something simply <b>exists</b>.
+    &nbsp;<span class="kr">학교<b>에</b> 가요</span> · <span class="kr">세 시<b>에</b> 만나요</span><br>
+    <span class="kr">에서</span> = <b>where an action happens</b>, or <b>from</b>.
+    &nbsp;<span class="kr">학교<b>에서</b> 공부해요</span> · <span class="kr">한국<b>에서</b> 왔어요</span>
+  </div>
+</div>
+
+<div class="foot"><kbd>1</kbd>–<kbd>4</kbd> choose &nbsp;·&nbsp; <kbd>Enter</kbd> next &nbsp;·&nbsp; <kbd>Space</kbd> hear it</div>
+
+<script src="_pack.js"></script>
+<script>
+var PACK=(function(){
+  var d=(window.STUDENT_PACK&&typeof window.STUDENT_PACK==='object')?window.STUDENT_PACK:null;
+  function val(k){var v=d&&d[k];if(v==null)return null;if(Array.isArray(v)&&!v.length)return null;return v;}
+  return{data:d,src:d?(d.student||'pack'):'',live:!!d,
+    get:function(k,fb){var v=val(k);return v===null?fb:v;},
+    has:function(k){return val(k)!==null;}};
+})();
+function groupBy(list,def){
+  var order=[],map={};
+  list.forEach(function(it){var g=it.group||def;if(!map[g]){map[g]=[];order.push(g);}map[g].push(it);});
+  return order.map(function(g){return{name:g,items:map[g]};});
+}
+var TTS=(function(){
+  var voices=[], voice=null, pref=null, mult=1;
+  try{var s=JSON.parse(localStorage.getItem('ktts')||'{}');pref=s.voice||null;mult=+s.rate||1;}catch(e){}
+  function save(){try{localStorage.setItem('ktts',JSON.stringify({voice:pref,rate:mult}));}catch(e){}}
+  function korean(){return voices.filter(function(v){return /^ko/i.test(v.lang||'')||/korean|한국/i.test(v.name||'');});}
+  function pick(){
+    voices=(window.speechSynthesis&&speechSynthesis.getVoices())||[];
+    var ks=korean(); voice=null;
+    if(pref) for(var i=0;i<ks.length;i++) if(ks[i].name===pref) voice=ks[i];
+    if(!voice) voice=ks[0]||null;
+    document.body.classList.toggle('no-voice',!voice);
+    if(window.__voicesChanged) window.__voicesChanged(ks,voice);
+  }
+  if(window.speechSynthesis){pick();speechSynthesis.onvoiceschanged=pick;setTimeout(pick,600);}
+  else document.body.classList.add('no-voice');
+  function utt(t,r){
+    var u=new SpeechSynthesisUtterance(t);
+    u.lang='ko-KR'; u.rate=Math.max(.1,Math.min(2,(r||0.82)*mult));
+    if(voice)u.voice=voice; return u;
+  }
+  return {
+    say:function(t,r){if(!window.speechSynthesis||!t)return;
+      try{speechSynthesis.cancel();}catch(e){} speechSynthesis.speak(utt(t,r));},
+    queue:function(list,r){if(!window.speechSynthesis||!list||!list.length)return;
+      try{speechSynthesis.cancel();}catch(e){} list.forEach(function(t){speechSynthesis.speak(utt(t,r));});},
+    voices:korean, current:function(){return voice;},
+    setVoice:function(n){pref=n;pick();save();},
+    rate:function(x){if(x!=null){mult=x;save();} return mult;}
+  };
+})();
+
+var JAMO_T=['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+function lastSyl(word){
+  for(var i=word.length-1;i>=0;i--){
+    var c=word.charCodeAt(i)-0xAC00;
+    if(c>=0&&c<=11171) return {ch:word[i], t:c%28};
+  }
+  return null;
+}
+function wordBeforeBlank(kr){
+  var head=kr.split('___')[0].replace(/\s+$/,'');
+  var parts=head.split(/\s+/);
+  return parts[parts.length-1]||'';
+}
+
+function Q(g,kr,options,answer,en,why){return {group:g,kr:kr,options:options,answer:answer,en:en,why:why};}
+var BUILTIN=[
+ Q('① 은 / 는','저___ 학생이에요.',['은','는'],'는','I am a student.',
+   'Topic marker. <span class="kr">저</span> ends in a vowel → <span class="kr">는</span>.'),
+ Q('① 은 / 는','제 이름___ 마리아예요.',['은','는'],'은','My name is Maria.',
+   '<span class="kr">이름</span> ends in the consonant <span class="kr">ㅁ</span> → <span class="kr">은</span>.'),
+ Q('① 은 / 는','김치___ 매워요.',['은','는'],'는','Kimchi is spicy.',
+   '<span class="kr">김치</span> ends in a vowel → <span class="kr">는</span>.'),
+ Q('① 은 / 는','한국___ 아름다워요.',['은','는'],'은','Korea is beautiful.',
+   '<span class="kr">한국</span> ends in <span class="kr">ㄱ</span> → <span class="kr">은</span>.'),
+ Q('① 은 / 는','선생님___ 한국 사람이에요.',['은','는'],'은','The teacher is Korean.',
+   '<span class="kr">선생님</span> ends in <span class="kr">ㅁ</span> → <span class="kr">은</span>.'),
+ Q('① 은 / 는','오늘___ 바빠요.',['은','는'],'은','Today I am busy.',
+   '<span class="kr">오늘</span> ends in <span class="kr">ㄹ</span> → <span class="kr">은</span>.'),
+
+ Q('② 이 / 가','날씨___ 좋아요.',['이','가'],'가','The weather is good.',
+   'Subject marker. <span class="kr">날씨</span> ends in a vowel → <span class="kr">가</span>.'),
+ Q('② 이 / 가','물___ 없어요.',['이','가'],'이','There is no water.',
+   '<span class="kr">물</span> ends in <span class="kr">ㄹ</span> → <span class="kr">이</span>.'),
+ Q('② 이 / 가','시간___ 있어요?',['이','가'],'이','Do you have time?',
+   '<span class="kr">시간</span> ends in <span class="kr">ㄴ</span> → <span class="kr">이</span>. <span class="kr">있어요 / 없어요</span> almost always take <span class="kr">이/가</span>.'),
+ Q('② 이 / 가','커피___ 맛있어요.',['이','가'],'가','The coffee is delicious.',
+   '<span class="kr">커피</span> ends in a vowel → <span class="kr">가</span>.'),
+ Q('② 이 / 가','사람___ 많아요.',['이','가'],'이','There are a lot of people.',
+   '<span class="kr">사람</span> ends in <span class="kr">ㅁ</span> → <span class="kr">이</span>.'),
+ Q('② 이 / 가','누구___ 왔어요?',['이','가'],'가','Who came?',
+   '<span class="kr">누구</span> ends in a vowel → <span class="kr">가</span>. (Careful: <span class="kr">누구 + 가</span> becomes <span class="kr">누가</span> in real speech.)'),
+
+ Q('③ 을 / 를','저는 밥___ 먹어요.',['을','를'],'을','I eat rice.',
+   'Object marker. <span class="kr">밥</span> ends in <span class="kr">ㅂ</span> → <span class="kr">을</span>.'),
+ Q('③ 을 / 를','저는 커피___ 마셔요.',['을','를'],'를','I drink coffee.',
+   '<span class="kr">커피</span> ends in a vowel → <span class="kr">를</span>.'),
+ Q('③ 을 / 를','저는 한국어___ 공부해요.',['을','를'],'를','I study Korean.',
+   '<span class="kr">한국어</span> ends in a vowel → <span class="kr">를</span>.'),
+ Q('③ 을 / 를','저는 책___ 읽어요.',['을','를'],'을','I read a book.',
+   '<span class="kr">책</span> ends in <span class="kr">ㄱ</span> → <span class="kr">을</span>.'),
+ Q('③ 을 / 를','친구___ 만나요.',['을','를'],'를','I meet a friend.',
+   '<span class="kr">친구</span> ends in a vowel → <span class="kr">를</span>. In Korean you "meet a friend" as an object.'),
+ Q('③ 을 / 를','영화___ 봐요.',['을','를'],'를','I watch a film.',
+   '<span class="kr">영화</span> ends in a vowel → <span class="kr">를</span>.'),
+
+ Q('④ 에 / 에서','학교___ 가요.',['에','에서'],'에','I go to school.',
+   'You are <b>moving to</b> school → <span class="kr">에</span>.'),
+ Q('④ 에 / 에서','학교___ 공부해요.',['에','에서'],'에서','I study at school.',
+   'Studying is an <b>action happening at</b> school → <span class="kr">에서</span>.'),
+ Q('④ 에 / 에서','집___ 있어요.',['에','에서'],'에','I am at home.',
+   'Simply <b>existing</b> somewhere → <span class="kr">에</span>. Use it with <span class="kr">있어요 / 없어요</span>.'),
+ Q('④ 에 / 에서','집___ 밥을 먹어요.',['에','에서'],'에서','I eat at home.',
+   'Eating is an action → <span class="kr">에서</span>.'),
+ Q('④ 에 / 에서','세 시___ 만나요.',['에','에서'],'에','Let us meet at three.',
+   'A point in <b>time</b> always takes <span class="kr">에</span>.'),
+ Q('④ 에 / 에서','카페___ 커피를 마셔요.',['에','에서'],'에서','I drink coffee at the café.',
+   'Action at a place → <span class="kr">에서</span>.'),
+ Q('④ 에 / 에서','어디___ 왔어요?',['에','에서'],'에서','Where did you come from?',
+   '<span class="kr">에서</span> also means <b>from</b>. Answer: <span class="kr">스페인에서 왔어요.</span>'),
+ Q('④ 에 / 에서','도서관___ 책을 읽어요.',['에','에서'],'에서','I read books at the library.',
+   'Reading is an action → <span class="kr">에서</span>.'),
+
+ Q('⑤ Mixed','저___ 학생이 아니에요.',['은','는','이','가'],'는','I am not a student.',
+   'Topic, after a vowel → <span class="kr">는</span>.'),
+ Q('⑤ Mixed','저는 고기___ 안 먹어요.',['을','를','이','가'],'를','I do not eat meat.',
+   'Object, after a vowel → <span class="kr">를</span>. <span class="kr">안</span> sits right before the verb.'),
+ Q('⑤ Mixed','그 사람___ 누구예요?',['은','는','을','를'],'은','Who is that person?',
+   'Topic, after <span class="kr">ㅁ</span> → <span class="kr">은</span>.'),
+ Q('⑤ Mixed','저___ 학생이에요. (me too!)',['은','는','도','를'],'도','I am a student too.',
+   '<span class="kr">도</span> means "also / too" and it <b>replaces</b> <span class="kr">은/는</span>: never both.'),
+ Q('⑤ Mixed','커피___ 빵을 주세요.',['하고','에서','를','도'],'하고','Coffee and bread, please.',
+   '<span class="kr">하고</span> = "and", for joining two nouns. Same batchim rule does not apply: it never changes.'),
+ Q('⑤ Mixed','몇 시___ 일어나요?',['에','에서','은','를'],'에','What time do you get up?',
+   'A point in time → <span class="kr">에</span>.')
+];
+
+var GROUPS=groupBy(PACK.get('particles',BUILTIN),'🔗 Particles');
+var gi=0, qi=0, picked=null, sc=0, tt=0, st=0, list=[];
+
+var lvEl=document.getElementById('levels');
+GROUPS.forEach(function(g,i){
+  var b=document.createElement('button'); b.textContent=g.name;
+  b.onclick=function(){ gi=i; qi=0; picked=null; render(); };
+  lvEl.appendChild(b);
+});
+if(GROUPS.length<2) lvEl.style.display='none';
+
+function render(){
+  [].forEach.call(lvEl.children,function(b,i){ b.className=i===gi?'on':''; });
+  list=GROUPS[gi].items;
+  if(qi>=list.length) qi=0;
+  var q=list[qi], parts=q.kr.split('___');
+  var shown = picked ? picked : '___';
+  var cls='blank'+(picked?(picked===q.answer?' ok':' no'):'');
+  document.getElementById('sentence').innerHTML=
+    (parts[0]||'')+'<span class="'+cls+'">'+(picked||'&nbsp;?&nbsp;')+'</span>'+(parts[1]||'');
+  document.getElementById('enline').textContent=q.en||'';
+
+  var el=document.getElementById('opts'); el.innerHTML='';
+  q.options.forEach(function(o){
+    var d=document.createElement('div');
+    var c='opt kr';
+    if(picked){ if(o===q.answer) c+=' right'; else if(o===picked) c+=' wrong'; }
+    d.className=c; d.textContent=o;
+    d.onclick=function(){ choose(o); };
+    el.appendChild(d);
+  });
+
+  var fb=document.getElementById('fb'), why=document.getElementById('why'), bt=document.getElementById('batchim');
+  if(picked){
+    if(picked===q.answer){ fb.textContent='✓ Correct!'; fb.className='fb ok'; }
+    else { fb.innerHTML='✕ It is <span class="kr">'+q.answer+'</span>'; fb.className='fb no'; }
+    why.className='why show'; why.innerHTML='💡 '+(q.why||'');
+    var w=wordBeforeBlank(q.kr), ls=lastSyl(w);
+    if(ls){
+      bt.className='batchim show';
+      bt.innerHTML= ls.t
+        ? 'Batchim check. <span class="kr" style="font-size:1.25em">'+w+'</span> ends in <span class="kr">'+ls.ch+
+          '</span>, and that block <b>has a bottom consonant</b> (<span class="kr">'+JAMO_T[ls.t]+'</span>). ✓ 받침'
+        : 'Batchim check. <span class="kr" style="font-size:1.25em">'+w+'</span> ends in <span class="kr">'+ls.ch+
+          '</span>, and that block has <b>no bottom consonant</b>. ✗ 받침';
+    } else bt.className='batchim';
+  }else{
+    fb.textContent=''; fb.className='fb';
+    why.className='why'; bt.className='batchim';
+  }
+  document.getElementById('sc').textContent=sc;
+  document.getElementById('tt').textContent=tt;
+  document.getElementById('st').textContent=st;
+}
+function choose(o){
+  if(picked) return;
+  var q=list[qi];
+  picked=o; tt++;
+  if(o===q.answer){ sc++; st++; } else st=0;
+  render();
+  if(o===q.answer){var sn=document.querySelector(".blank.ok"); if(sn) sn.className+=" pop";}
+  TTS.say(q.kr.replace('___',q.answer),0.8);
+}
+document.getElementById('next').onclick=function(){ qi=(qi+1)%list.length; picked=null; render(); };
+document.getElementById('say').onclick=function(){
+  var q=list[qi]; TTS.say(q.kr.replace('___',picked||q.answer),0.8);
+};
+document.addEventListener('keydown',function(e){
+  var q=list[qi];
+  if(/^[1-4]$/.test(e.key)){ var o=q.options[+e.key-1]; if(o) choose(o); }
+  else if(e.key==='Enter'){ e.preventDefault(); document.getElementById('next').click(); }
+  else if(e.key===' '){ e.preventDefault(); document.getElementById('say').click(); }
+});
+render();
+
+/* --- voice settings popover, shared by all ten apps --- */
+function mountChrome(){
+  var btn=document.getElementById('abSet'); if(!btn) return;
+  var ov=document.createElement('div'); ov.id='abov';
+  ov.innerHTML='<div id="abbox"><h2>🔊 Voice</h2>'+
+    '<p>Windows and macOS ship more than one Korean voice. Some are much clearer than others: try them.</p>'+
+    '<label for="abVoice">Korean voice</label><select id="abVoice"></select>'+
+    '<label for="abRate">Speed. <span id="abRateV">normal</span></label>'+
+    '<input type="range" id="abRate" min="0.5" max="1.3" step="0.05">'+
+    '<div class="abhint">Beginners follow about 30% slower than a native pace.</div>'+
+    '<div class="r"><button id="abTest">🔊 Test</button><button id="abClose">Done</button></div></div>';
+  document.body.appendChild(ov);
+  var sel=ov.querySelector('#abVoice'), rng=ov.querySelector('#abRate'), lab=ov.querySelector('#abRateV');
+  function label(v){return v<0.75?'slow':v<0.95?'a little slow':v<1.1?'normal':'fast';}
+  function fill(list,cur){
+    sel.innerHTML='';
+    if(!list||!list.length){
+      var o=document.createElement('option'); o.textContent='No Korean voice on this device'; o.disabled=true;
+      sel.appendChild(o); sel.disabled=true; return;
+    }
+    sel.disabled=false;
+    list.forEach(function(v){
+      var o=document.createElement('option'); o.value=v.name;
+      o.textContent=v.name+' ('+v.lang+')';
+      if(cur&&v.name===cur.name) o.selected=true;
+      sel.appendChild(o);
+    });
+  }
+  window.__voicesChanged=fill;
+  fill(TTS.voices(),TTS.current());
+  rng.value=TTS.rate(); lab.textContent=label(TTS.rate());
+  sel.onchange=function(){TTS.setVoice(this.value);TTS.say('안녕하세요');};
+  rng.oninput=function(){TTS.rate(+this.value);lab.textContent=label(+this.value);};
+  rng.onchange=function(){TTS.say('안녕하세요. 만나서 반가워요.');};
+  ov.querySelector('#abTest').onclick=function(){TTS.say('안녕하세요. 만나서 반가워요.');};
+  ov.querySelector('#abClose').onclick=function(){ov.className='';};
+  ov.onclick=function(e){if(e.target===ov)ov.className='';};
+  btn.onclick=function(){ov.className='on';};
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')ov.className='';});
+}
+
+mountChrome();
+</script>
+
+<script src="assets/_progress.js"></script>
+<script>
+Progress.visit('09');
+/* 다음 화면으로 넘어가는 큰 링크를 누르면 그 화면을 끝낸 것으로 본다 */
+document.addEventListener('click',function(e){
+  var t=e.target; while(t&&t!==document){ if(t.classList&&t.classList.contains('onward')){ Progress.done('09'); break; } t=t.parentNode; }
+},true);
+</script>
+</body>
+</html>

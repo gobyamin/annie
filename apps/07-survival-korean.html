@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Survival Korean</title>
+<style>
+:root{
+  /* hanji paper and meok ink */
+  --bg:#f7efdd; --card:#fffdf6; --ink:#221c14; --muted:#6b6353; --line:#221c14;
+  /* obangsaek-leaning accents: 청 홍 황 녹 자 */
+  --blue:#1d5fa9; --orange:#d46508; --green:#2c7a57; --red:#bf3b2e; --purple:#6d3fae;
+  /* tinted hanji surfaces */
+  --sky:#eef2f7; --mint:#edf2ec; --blush:#f7ece7; --amber:#f7f1dc; --paper2:#fbf7ec;
+  --hair:#ded2b8;
+  /* depth */
+  --sh:4px 4px 0 var(--line); --sh1:2px 2px 0 var(--line);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  font-size:17px;line-height:1.45;padding:18px 14px 30px;max-width:1000px;margin:0 auto}
+.kr{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;font-weight:800;word-break:keep-all}
+h1{font-size:clamp(20px,4.4vw,30px);margin:0;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:14px;margin-top:2px}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+button{font:inherit;font-weight:700;cursor:pointer;border:3px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:12px;padding:10px 14px;min-height:46px;box-shadow:2px 2px 0 var(--line);transition:transform .06s,box-shadow .06s}
+button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--line)}
+button.on{background:var(--ink);color:#fff}
+.scenes{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+.scenes button{border-radius:999px;padding:9px 15px;min-height:44px;font-size:15px}
+.scenes button.on{background:var(--purple);color:#fff}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.toolbar button{min-height:44px;font-size:14px;padding:9px 12px}
+.panel{background:var(--card);border:3px solid var(--line);border-radius:22px;box-shadow:var(--sh);padding:18px;margin-bottom:14px}
+.goal{font-size:clamp(17px,3.6vw,22px);font-weight:800}
+.goalsub{color:var(--muted);font-size:15px;font-weight:700;margin-top:2px}
+.key{margin-top:12px;background:#fff6d9;border:3px solid var(--line);border-radius:16px;padding:12px 15px;
+  font-size:clamp(17px,3.8vw,23px);font-weight:800}
+.key small{display:block;font-size:13px;color:var(--muted);letter-spacing:.06em;font-weight:800;margin-bottom:3px}
+.chat{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+.turn{display:flex;flex-direction:column;max-width:88%}
+.turn.me{align-self:flex-end;align-items:flex-end;text-align:right}
+.who{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.05em;margin-bottom:3px}
+.turn.me .who{flex-direction:row-reverse}
+.av{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;
+  border:2.5px solid var(--line);background:var(--card);font-size:16px;box-shadow:2px 2px 0 var(--line)}
+.turn.me .av{background:var(--mint)}
+.bub{border:3px solid var(--line);border-radius:18px;padding:12px 15px;background:#f1f5ff;box-shadow:3px 3px 0 var(--line);cursor:pointer}
+.turn.me .bub{background:#e7fbef}
+.bub .k{font-size:clamp(23px,4.6vw,40px);line-height:1.25}
+.bub .r{font-size:clamp(13px,2.8vw,16px);color:var(--blue);font-weight:800;margin-top:3px}
+.bub .e{font-size:clamp(14px,3vw,17px);color:var(--muted);font-weight:700;margin-top:3px}
+.hide-rom .bub .r{display:none}
+.turn.masked .bub .k,.turn.masked .bub .r{filter:blur(11px)}
+.turn.masked .bub::after{content:"👆 your line: try it, then tap";display:block;font-size:13px;color:var(--red);font-weight:800;margin-top:6px}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.acts button{flex:1 1 160px}
+#playall{background:var(--orange)}
+.hintbar{color:var(--muted);font-size:14px;margin-top:10px;text-align:center}
+.warn{display:none;background:#ffe8e8;border:3px solid var(--red);border-radius:14px;padding:10px 14px;font-weight:700;margin-bottom:12px;font-size:15px}
+body.no-voice .warn{display:block}
+kbd{background:var(--card);border:2px solid var(--line);border-bottom-width:3px;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:800}
+.foot{margin-top:10px;color:var(--muted);font-size:13px;text-align:center}
+/* --- shared chrome: nav bar, focus, motion, pack loader --- */
+.appbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-2px 0 14px}
+.appbar a,.appbar button{font:inherit;font-weight:800;font-size:14px;text-decoration:none;
+  color:var(--muted);background:transparent;border:0;box-shadow:none;padding:7px 10px;
+  min-height:40px;display:inline-flex;align-items:center;gap:6px;border-radius:10px;cursor:pointer;transition:none}
+.appbar a:hover,.appbar button:hover{background:rgba(0,0,0,.055);color:var(--ink)}
+.appbar a:active,.appbar button:active{transform:none;box-shadow:none}
+.ab-home{border:2px solid var(--line)!important;color:var(--ink)!important;background:var(--card)!important;
+  box-shadow:2px 2px 0 var(--line)!important}
+.ab-home:active{transform:translate(2px,2px)!important;box-shadow:none!important}
+.ab-step{background:#a63a2e;color:#fbf3e4;font-size:12px;font-weight:800;letter-spacing:.12em;
+  padding:5px 9px;border-radius:7px;box-shadow:inset 0 0 0 2px rgba(251,243,228,.55);margin-left:2px}
+.ab-right{margin-left:auto;display:flex;gap:2px;align-items:center}
+.ab-arrow{font-size:19px;line-height:1;padding:7px 13px}
+.ab-arrow[aria-disabled="true"]{opacity:.25;pointer-events:none}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:4px}
+@keyframes pop{0%{transform:scale(.94)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
+.pop{animation:pop .22s ease-out}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+#abov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(18,18,24,.55);z-index:70;
+  display:none;align-items:center;justify-content:center;padding:14px}
+#abov.on{display:flex}
+#abbox label{display:block;font-weight:800;font-size:14px;margin:14px 0 6px}
+#abbox select,#abbox input[type=range]{width:100%;font:inherit;font-weight:700;
+  border:3px solid var(--line);border-radius:12px;padding:10px;background:var(--card);min-height:46px}
+#abbox input[type=range]{padding:0;height:46px}
+.abhint{font-size:14px;color:var(--muted);margin-top:6px}
+/* --- hanji paper + saekdong band --- */
+body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(rgba(120,90,40,.055) 1px,transparent 1.3px),
+    radial-gradient(rgba(120,90,40,.04) 1px,transparent 1.3px),
+    radial-gradient(rgba(255,255,255,.5) 1.4px,transparent 1.6px);
+  background-size:26px 26px,42px 42px,34px 34px;
+  background-position:0 0,13px 21px,7px 3px;
+}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:5px;z-index:90;pointer-events:none;
+  background:repeating-linear-gradient(90deg,
+    #a8524e 0 44px,#f3ecd9 44px 47px,
+    #c9973f 47px 91px,#f3ecd9 91px 94px,
+    #41678f 94px 138px,#f3ecd9 138px 141px,
+    #4f7d62 141px 185px,#f3ecd9 185px 188px,
+    #6f5590 188px 232px,#f3ecd9 232px 235px);
+  opacity:.85}
+</style>
+<link rel="stylesheet" href="assets/_ui.css">
+</head>
+<body>
+
+<nav class="appbar">
+  <a class="ab-home" href="index.html">‹ All apps</a>
+  <span class="ab-step">07 / 10</span>
+  <span class="ab-right">
+    <a class="ab-arrow" href="06-number-machine.html" title="Previous app" aria-label="Previous app">‹</a>
+    <a class="ab-arrow" href="08-sentence-builder.html" title="Next app" aria-label="Next app">›</a>
+    <button id="abSet" title="Voice settings" aria-label="Voice settings">🔊</button>
+  </span>
+</nav>
+
+<div class="warn">🔇 No Korean voice on this device: the 🔊 buttons will be silent. Read the lines aloud together instead.</div>
+
+<header>
+  <div class="seal">07</div>
+  <div style="flex:1;min-width:200px">
+    <h1>Survival Korean</h1>
+    <div class="sub">One scene, both speakers. Take a role and say your lines out loud.</div>
+  </div>
+  <div class="toolbar">
+    <button id="maskBtn">🙈 Hide my lines: OFF</button>
+    <button id="swapBtn">🔁 Swap role</button>
+    <button id="romBtn" class="on">Aa Romanization: ON</button>
+  </div>
+</header>
+
+<div class="scenes" id="scenes"></div>
+
+<div class="panel">
+  <div class="goal" id="goal"></div>
+  <div class="goalsub" id="goalsub"></div>
+  <div class="key" id="key"></div>
+</div>
+
+<div class="panel">
+  <div class="chat" id="chat"></div>
+  <div class="acts">
+    <button id="step">▶ Show next line</button>
+    <button id="all">👁 Show whole scene</button>
+    <button id="playall">🔊 Play the scene</button>
+    <button id="reset">↻ Start over</button>
+  </div>
+  <div class="hintbar">Tap any line to hear it again.</div>
+</div>
+
+<div class="foot"><kbd>→</kbd> next line &nbsp;·&nbsp; <kbd>A</kbd> show all &nbsp;·&nbsp; <kbd>P</kbd> play scene &nbsp;·&nbsp; <kbd>M</kbd> hide my lines</div>
+
+<script src="_pack.js"></script>
+<script>
+var PACK=(function(){
+  var d=(window.STUDENT_PACK&&typeof window.STUDENT_PACK==='object')?window.STUDENT_PACK:null;
+  function val(k){var v=d&&d[k];if(v==null)return null;if(Array.isArray(v)&&!v.length)return null;return v;}
+  return{data:d,src:d?(d.student||'pack'):'',live:!!d,
+    get:function(k,fb){var v=val(k);return v===null?fb:v;},
+    has:function(k){return val(k)!==null;}};
+})();
+var TTS=(function(){
+  var voices=[], voice=null, pref=null, mult=1;
+  try{var s=JSON.parse(localStorage.getItem('ktts')||'{}');pref=s.voice||null;mult=+s.rate||1;}catch(e){}
+  function save(){try{localStorage.setItem('ktts',JSON.stringify({voice:pref,rate:mult}));}catch(e){}}
+  function korean(){return voices.filter(function(v){return /^ko/i.test(v.lang||'')||/korean|한국/i.test(v.name||'');});}
+  function pick(){
+    voices=(window.speechSynthesis&&speechSynthesis.getVoices())||[];
+    var ks=korean(); voice=null;
+    if(pref) for(var i=0;i<ks.length;i++) if(ks[i].name===pref) voice=ks[i];
+    if(!voice) voice=ks[0]||null;
+    document.body.classList.toggle('no-voice',!voice);
+    if(window.__voicesChanged) window.__voicesChanged(ks,voice);
+  }
+  if(window.speechSynthesis){pick();speechSynthesis.onvoiceschanged=pick;setTimeout(pick,600);}
+  else document.body.classList.add('no-voice');
+  function utt(t,r){
+    var u=new SpeechSynthesisUtterance(t);
+    u.lang='ko-KR'; u.rate=Math.max(.1,Math.min(2,(r||0.82)*mult));
+    if(voice)u.voice=voice; return u;
+  }
+  return {
+    say:function(t,r){if(!window.speechSynthesis||!t)return;
+      try{speechSynthesis.cancel();}catch(e){} speechSynthesis.speak(utt(t,r));},
+    queue:function(list,r){if(!window.speechSynthesis||!list||!list.length)return;
+      try{speechSynthesis.cancel();}catch(e){} list.forEach(function(t){speechSynthesis.speak(utt(t,r));});},
+    voices:korean, current:function(){return voice;},
+    setVoice:function(n){pref=n;pick();save();},
+    rate:function(x){if(x!=null){mult=x;save();} return mult;}
+  };
+})();
+
+function L(who,kr,r,en){return {who:who,kr:kr,r:r,en:en};}
+var BUILTIN=[
+ {scene:'👋 First meeting', goal:'Introduce yourself and say where you are from',
+  key:'저는 ___ 예요 &nbsp;=&nbsp; I am ___', me:'You', lines:[
+  L('Korean','안녕하세요.','an-nyeong-ha-se-yo','Hello.'),
+  L('You','안녕하세요.','an-nyeong-ha-se-yo','Hello.'),
+  L('Korean','이름이 뭐예요?','i-reu-mi mwo-ye-yo','What is your name?'),
+  L('You','저는 마리아예요.','jeo-neun ma-ri-a-ye-yo','I am Maria.'),
+  L('Korean','어느 나라에서 왔어요?','eo-neu na-ra-e-seo wa-sseo-yo','Which country are you from?'),
+  L('You','스페인에서 왔어요.','seu-pe-i-ne-seo wa-sseo-yo','I am from Spain.'),
+  L('Korean','만나서 반가워요.','man-na-seo ban-ga-wo-yo','Nice to meet you.'),
+  L('You','저도 반가워요.','jeo-do ban-ga-wo-yo','Nice to meet you too.')]},
+
+ {scene:'☕ Café', goal:'Order a drink and pay',
+  key:'___ 주세요 &nbsp;=&nbsp; ___ , please', me:'You', lines:[
+  L('Staff','어서 오세요.','eo-seo o-se-yo','Welcome!'),
+  L('You','아메리카노 한 잔 주세요.','a-me-ri-ka-no han jan ju-se-yo','One americano, please.'),
+  L('Staff','따뜻한 거요, 아이스요?','tta-tteu-tan geo-yo, a-i-seu-yo','Hot or iced?'),
+  L('You','아이스로 주세요.','a-i-seu-ro ju-se-yo','Iced, please.'),
+  L('Staff','드시고 가세요?','deu-si-go ga-se-yo','For here?'),
+  L('You','네, 여기서 먹을게요.','ne, yeo-gi-seo meo-geul-ge-yo','Yes, I will have it here.'),
+  L('Staff','사천오백 원입니다.','sa-cheo-no-baek wo-nim-ni-da','That is 4,500 won.'),
+  L('You','카드 돼요?','ka-deu dwae-yo','Can I pay by card?'),
+  L('Staff','네, 됩니다.','ne, doem-ni-da','Yes, you can.')]},
+
+ {scene:'🍚 Restaurant', goal:'Call the server, order, ask for water, pay',
+  key:'저기요! &nbsp;=&nbsp; Excuse me! (how you call a server)', me:'You', lines:[
+  L('You','저기요!','jeo-gi-yo','Excuse me!'),
+  L('Staff','네, 주문하시겠어요?','ne, ju-mun-ha-si-ge-sseo-yo','Yes, ready to order?'),
+  L('You','이거 하나 주세요.','i-geo ha-na ju-se-yo','One of this, please.'),
+  L('Staff','매운 거 괜찮으세요?','mae-un geo gwaen-cha-neu-se-yo','Is spicy food okay?'),
+  L('You','안 맵게 해 주세요.','an maep-ge hae ju-se-yo','Not spicy, please.'),
+  L('Staff','네, 알겠습니다.','ne, al-ge-sseum-ni-da','Certainly.'),
+  L('You','물 좀 주세요.','mul jom ju-se-yo','Some water, please.'),
+  L('You','계산할게요.','gye-san-hal-ge-yo','I would like to pay.')]},
+
+ {scene:'🛍️ Shopping', goal:'Ask the price, ask for a discount, buy it',
+  key:'얼마예요? &nbsp;=&nbsp; How much is it?', me:'You', lines:[
+  L('Staff','뭐 찾으세요?','mwo cha-jeu-se-yo','What are you looking for?'),
+  L('You','그냥 볼게요.','geu-nyang bol-ge-yo','I am just looking.'),
+  L('You','이거 얼마예요?','i-geo eol-ma-ye-yo','How much is this?'),
+  L('Staff','만 오천 원이에요.','man o-cheon wo-ni-e-yo','It is 15,000 won.'),
+  L('You','좀 깎아 주세요.','jom kka-kka ju-se-yo','Could you give me a discount?'),
+  L('Staff','조금만 깎아 드릴게요.','jo-geum-man kka-kka deu-ril-ge-yo','I will take a little off.'),
+  L('You','다른 색깔 있어요?','da-reun saek-kkal i-sseo-yo','Do you have another colour?'),
+  L('Staff','네, 있어요.','ne, i-sseo-yo','Yes, we do.'),
+  L('You','이걸로 할게요.','i-geol-lo hal-ge-yo','I will take this one.')]},
+
+ {scene:'🚕 Taxi', goal:'Say where you are going and stop the car',
+  key:'___ 로 가 주세요 &nbsp;=&nbsp; Please go to ___', me:'You', lines:[
+  L('Driver','어디 가세요?','eo-di ga-se-yo','Where are you going?'),
+  L('You','서울역으로 가 주세요.','seo-ul-lyeo-geu-ro ga ju-se-yo','To Seoul Station, please.'),
+  L('Driver','네, 알겠습니다.','ne, al-ge-sseum-ni-da','Got it.'),
+  L('You','얼마나 걸려요?','eol-ma-na geol-lyeo-yo','How long does it take?'),
+  L('Driver','이십 분쯤 걸려요.','i-sip bun-jjeum geol-lyeo-yo','About twenty minutes.'),
+  L('You','여기서 세워 주세요.','yeo-gi-seo se-wo ju-se-yo','Please stop here.'),
+  L('Driver','만 이천 원입니다.','man i-cheon wo-nim-ni-da','That is 12,000 won.'),
+  L('You','카드로 할게요. 감사합니다.','ka-deu-ro hal-ge-yo. gam-sa-ham-ni-da','By card, please. Thank you.')]},
+
+ {scene:'🙋 Getting help', goal:'Ask for help when you are lost or stuck',
+  key:'다시 한 번 말해 주세요 &nbsp;=&nbsp; Please say that again', me:'You', lines:[
+  L('You','저기요, 좀 도와주세요.','jeo-gi-yo, jom do-wa-ju-se-yo','Excuse me, could you help me?'),
+  L('Passer-by','네, 무슨 일이세요?','ne, mu-seun i-ri-se-yo','Sure, what is the matter?'),
+  L('You','화장실이 어디예요?','hwa-jang-si-ri eo-di-ye-yo','Where is the toilet?'),
+  L('Passer-by','저쪽으로 쭉 가세요.','jeo-jjo-geu-ro jjuk ga-se-yo','Go straight that way.'),
+  L('You','죄송해요, 한국말 잘 못해요.','joe-song-hae-yo, han-gung-mal jal mo-tae-yo','Sorry, I do not speak Korean well.'),
+  L('Passer-by','천천히 말할게요.','cheon-cheon-hi mal-hal-ge-yo','I will speak slowly.'),
+  L('You','다시 한 번 말해 주세요.','da-si han beon mal-hae ju-se-yo','Please say that once more.'),
+  L('You','감사합니다!','gam-sa-ham-ni-da','Thank you!')]},
+
+ {scene:'📞 Making plans', goal:'Invite a friend and agree on a time',
+  key:'같이 ___ 할래요? &nbsp;=&nbsp; Shall we ___ together?', me:'You', lines:[
+  L('Friend','주말에 뭐 해요?','ju-ma-re mwo hae-yo','What are you doing this weekend?'),
+  L('You','아직 몰라요.','a-jik mol-la-yo','I do not know yet.'),
+  L('Friend','같이 밥 먹을래요?','ga-chi bap meo-geul-lae-yo','Shall we eat together?'),
+  L('You','좋아요! 언제요?','jo-a-yo! eon-je-yo','Sounds good! When?'),
+  L('Friend','토요일 여섯 시 어때요?','to-yo-il yeo-seot si eo-ttae-yo','How about Saturday at six?'),
+  L('You','네, 괜찮아요.','ne, gwaen-cha-na-yo','Yes, that works.'),
+  L('Friend','그럼 이따 연락할게요.','geu-reom i-tta yeol-la-kal-ge-yo','I will message you later then.'),
+  L('You','네, 그때 봐요!','ne, geu-ttae bwa-yo','Okay, see you then!')]},
+
+ {scene:'🏥 Feeling sick', goal:'Explain your symptom at a pharmacy',
+  key:'___ 아파요 &nbsp;=&nbsp; My ___ hurts', me:'You', lines:[
+  L('Pharmacist','어디가 아프세요?','eo-di-ga a-peu-se-yo','Where does it hurt?'),
+  L('You','배가 아파요.','bae-ga a-pa-yo','My stomach hurts.'),
+  L('Pharmacist','언제부터요?','eon-je-bu-teo-yo','Since when?'),
+  L('You','어제부터요.','eo-je-bu-teo-yo','Since yesterday.'),
+  L('Pharmacist','열도 있어요?','yeol-do i-sseo-yo','Do you have a fever too?'),
+  L('You','아니요, 열은 없어요.','a-ni-yo, yeo-reun eop-seo-yo','No, I do not have a fever.'),
+  L('Pharmacist','이 약 드세요. 하루 세 번이요.','i yak deu-se-yo. ha-ru se beo-ni-yo','Take this medicine, three times a day.'),
+  L('You','네, 감사합니다.','ne, gam-sa-ham-ni-da','Okay, thank you.')]},
+
+ {scene:'🧑‍🏫 In the lesson', goal:'Keep the lesson going in Korean',
+  key:'천천히 말해 주세요 &nbsp;=&nbsp; Please speak slowly', me:'You', lines:[
+  L('Teacher','오늘 어때요?','o-neul eo-ttae-yo','How are you today?'),
+  L('You','좋아요. 좀 피곤해요.','jo-a-yo. jom pi-gon-hae-yo','Good. A bit tired.'),
+  L('Teacher','이해했어요?','i-hae-hae-sseo-yo','Did you understand?'),
+  L('You','잘 모르겠어요.','jal mo-reu-ge-sseo-yo','I am not sure.'),
+  L('You','다시 한 번 말해 주세요.','da-si han beon mal-hae ju-se-yo','Please say that once more.'),
+  L('You','천천히 말해 주세요.','cheon-cheon-hi mal-hae ju-se-yo','Please speak slowly.'),
+  L('You','이거 영어로 뭐예요?','i-geo yeong-eo-ro mwo-ye-yo','What is this in English?'),
+  L('Teacher','잘했어요!','jal-hae-sseo-yo','Well done!')]},
+
+ {scene:'🏠 You are the host', goal:'Welcome a guest into your home',
+  key:'많이 드세요 &nbsp;=&nbsp; Please help yourself', me:'You', lines:[
+  L('You','어서 오세요. 들어오세요.','eo-seo o-se-yo. deu-reo-o-se-yo','Welcome. Please come in.'),
+  L('Guest','초대해 주셔서 감사합니다.','cho-dae-hae ju-syeo-seo gam-sa-ham-ni-da','Thank you for inviting me.'),
+  L('You','여기 앉으세요.','yeo-gi an-jeu-se-yo','Please sit here.'),
+  L('You','뭐 드실래요?','mwo deu-sil-lae-yo','What would you like to drink?'),
+  L('Guest','물 주세요.','mul ju-se-yo','Water, please.'),
+  L('You','많이 드세요.','ma-ni deu-se-yo','Please help yourself.'),
+  L('You','더 드릴까요?','deo deu-ril-kka-yo','Would you like some more?'),
+  L('Guest','아니요, 괜찮아요. 잘 먹었습니다.','a-ni-yo, gwaen-cha-na-yo. jal meo-geo-sseum-ni-da','No, I am fine. That was delicious.'),
+  L('You','또 오세요!','tto o-se-yo','Please come again!')]}
+];
+
+var SCENES=PACK.get('phrases',BUILTIN);
+var si=0, shown=0, mask=false, swapped=false, showRom=true;
+
+var scEl=document.getElementById('scenes');
+SCENES.forEach(function(s,i){
+  var b=document.createElement('button'); b.textContent=s.scene||('Scene '+(i+1));
+  b.onclick=function(){ si=i; shown=0; render(); };
+  scEl.appendChild(b);
+});
+if(SCENES.length<2) scEl.style.display='none';
+
+var AVATAR={"You":"🙋","Staff":"🧑‍💼","Driver":"🧑‍✈️","Guest":"🧳","Friend":"👋","Teacher":"🧑‍🏫",
+ "Pharmacist":"💊","Passer-by":"🚶","Korean":"🇰🇷","Seller":"🧺"};
+function avatarOf(l,mine){ return AVATAR[l.who]||(mine?"🙋":"🗣️"); }
+function meRole(s){ return s.me||'You'; }
+function isMine(s,l){
+  var mine = l.who===meRole(s);
+  return swapped ? !mine : mine;
+}
+function render(){
+  [].forEach.call(scEl.children,function(b,i){ b.className=i===si?'on':''; });
+  var s=SCENES[si];
+  document.getElementById('goal').textContent=s.scene||'';
+  document.getElementById('goalsub').textContent=s.goal||'';
+  var k=document.getElementById('key');
+  if(s.key){ k.style.display='block'; k.innerHTML='<small>KEY EXPRESSION</small><span class="kr">'+s.key+'</span>'; }
+  else k.style.display='none';
+  document.body.classList.toggle('hide-rom',!showRom);
+
+  var chat=document.getElementById('chat'); chat.innerHTML='';
+  s.lines.forEach(function(l,i){
+    if(i>=shown) return;
+    var mine=isMine(s,l);
+    var d=document.createElement('div');
+    d.className='turn'+(mine?' me':'')+((mask&&mine&&!l._open)?' masked':'');
+    d.innerHTML='<div class="who"><span class="av">'+avatarOf(l,mine)+'</span>'+(l.who||'')+'</div>'+
+      '<div class="bub"><div class="k kr">'+l.kr+'</div>'+
+      (l.r?'<div class="r">'+l.r+'</div>':'')+
+      (l.en?'<div class="e">'+l.en+'</div>':'')+'</div>';
+    d.querySelector('.bub').onclick=function(){
+      if(mask&&mine&&!l._open){ l._open=true; render(); }
+      TTS.say(l.kr,0.82);
+    };
+    chat.appendChild(d);
+  });
+  var st=document.getElementById('step');
+  st.textContent = shown>=s.lines.length ? '✓ Scene complete' : '▶ Show next line ('+(shown+1)+'/'+s.lines.length+')';
+}
+function step(){
+  var s=SCENES[si];
+  if(shown<s.lines.length){
+    var l=s.lines[shown]; shown++;
+    render();
+    if(!(mask&&isMine(s,l))) TTS.say(l.kr,0.82);
+    var chat=document.getElementById('chat');
+    if(chat.lastChild&&chat.lastChild.scrollIntoView) chat.lastChild.scrollIntoView({block:'nearest'});
+  }
+}
+document.getElementById('step').onclick=step;
+document.getElementById('all').onclick=function(){ shown=SCENES[si].lines.length; render(); };
+document.getElementById('reset').onclick=function(){
+  shown=0; SCENES[si].lines.forEach(function(l){l._open=false;}); render();
+};
+document.getElementById('playall').onclick=function(){
+  var s=SCENES[si]; shown=s.lines.length; render();
+  TTS.queue(s.lines.map(function(l){return l.kr;}),0.85);
+};
+document.getElementById('maskBtn').onclick=function(){
+  mask=!mask; this.textContent='🙈 Hide my lines: '+(mask?'ON':'OFF'); this.className=mask?'on':'';
+  SCENES[si].lines.forEach(function(l){l._open=false;}); render();
+};
+document.getElementById('swapBtn').onclick=function(){
+  swapped=!swapped; this.className=swapped?'on':'';
+  SCENES[si].lines.forEach(function(l){l._open=false;}); render();
+};
+document.getElementById('romBtn').onclick=function(){
+  showRom=!showRom; this.textContent='Aa Romanization: '+(showRom?'ON':'OFF');
+  this.className=showRom?'on':''; render();
+};
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight'){e.preventDefault();step();}
+  else if(e.key==='a'||e.key==='A'){shown=SCENES[si].lines.length;render();}
+  else if(e.key==='p'||e.key==='P'){document.getElementById('playall').click();}
+  else if(e.key==='m'||e.key==='M'){document.getElementById('maskBtn').click();}
+});
+render();
+
+/* --- voice settings popover, shared by all ten apps --- */
+function mountChrome(){
+  var btn=document.getElementById('abSet'); if(!btn) return;
+  var ov=document.createElement('div'); ov.id='abov';
+  ov.innerHTML='<div id="abbox"><h2>🔊 Voice</h2>'+
+    '<p>Windows and macOS ship more than one Korean voice. Some are much clearer than others: try them.</p>'+
+    '<label for="abVoice">Korean voice</label><select id="abVoice"></select>'+
+    '<label for="abRate">Speed. <span id="abRateV">normal</span></label>'+
+    '<input type="range" id="abRate" min="0.5" max="1.3" step="0.05">'+
+    '<div class="abhint">Beginners follow about 30% slower than a native pace.</div>'+
+    '<div class="r"><button id="abTest">🔊 Test</button><button id="abClose">Done</button></div></div>';
+  document.body.appendChild(ov);
+  var sel=ov.querySelector('#abVoice'), rng=ov.querySelector('#abRate'), lab=ov.querySelector('#abRateV');
+  function label(v){return v<0.75?'slow':v<0.95?'a little slow':v<1.1?'normal':'fast';}
+  function fill(list,cur){
+    sel.innerHTML='';
+    if(!list||!list.length){
+      var o=document.createElement('option'); o.textContent='No Korean voice on this device'; o.disabled=true;
+      sel.appendChild(o); sel.disabled=true; return;
+    }
+    sel.disabled=false;
+    list.forEach(function(v){
+      var o=document.createElement('option'); o.value=v.name;
+      o.textContent=v.name+' ('+v.lang+')';
+      if(cur&&v.name===cur.name) o.selected=true;
+      sel.appendChild(o);
+    });
+  }
+  window.__voicesChanged=fill;
+  fill(TTS.voices(),TTS.current());
+  rng.value=TTS.rate(); lab.textContent=label(TTS.rate());
+  sel.onchange=function(){TTS.setVoice(this.value);TTS.say('안녕하세요');};
+  rng.oninput=function(){TTS.rate(+this.value);lab.textContent=label(+this.value);};
+  rng.onchange=function(){TTS.say('안녕하세요. 만나서 반가워요.');};
+  ov.querySelector('#abTest').onclick=function(){TTS.say('안녕하세요. 만나서 반가워요.');};
+  ov.querySelector('#abClose').onclick=function(){ov.className='';};
+  ov.onclick=function(e){if(e.target===ov)ov.className='';};
+  btn.onclick=function(){ov.className='on';};
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')ov.className='';});
+}
+
+mountChrome();
+</script>
+
+<script src="assets/_progress.js"></script>
+<script>
+Progress.visit('07');
+/* 다음 화면으로 넘어가는 큰 링크를 누르면 그 화면을 끝낸 것으로 본다 */
+document.addEventListener('click',function(e){
+  var t=e.target; while(t&&t!==document){ if(t.classList&&t.classList.contains('onward')){ Progress.done('07'); break; } t=t.parentNode; }
+},true);
+</script>
+</body>
+</html>

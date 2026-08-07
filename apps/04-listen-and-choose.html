@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Listen &amp; Choose</title>
+<style>
+:root{
+  /* hanji paper and meok ink */
+  --bg:#f7efdd; --card:#fffdf6; --ink:#221c14; --muted:#6b6353; --line:#221c14;
+  /* obangsaek-leaning accents: 청 홍 황 녹 자 */
+  --blue:#1d5fa9; --orange:#d46508; --green:#2c7a57; --red:#bf3b2e; --purple:#6d3fae;
+  /* tinted hanji surfaces */
+  --sky:#eef2f7; --mint:#edf2ec; --blush:#f7ece7; --amber:#f7f1dc; --paper2:#fbf7ec;
+  --hair:#ded2b8;
+  /* depth */
+  --sh:4px 4px 0 var(--line); --sh1:2px 2px 0 var(--line);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  font-size:17px;line-height:1.45;padding:18px 14px 30px;max-width:1000px;margin:0 auto}
+.kr{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;font-weight:800;word-break:keep-all}
+h1{font-size:clamp(20px,4.4vw,30px);margin:0;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:14px;margin-top:2px}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+button{font:inherit;font-weight:700;cursor:pointer;border:3px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:12px;padding:10px 14px;min-height:46px;box-shadow:2px 2px 0 var(--line);transition:transform .06s,box-shadow .06s}
+button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--line)}
+.sets{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+.sets button{border-radius:999px;padding:9px 15px;min-height:44px;font-size:16px}
+.sets button.on{background:var(--purple);color:#fff}
+.panel{background:var(--card);border:3px solid var(--line);border-radius:22px;box-shadow:var(--sh);padding:18px;margin-bottom:14px}
+.playrow{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}
+#play{background:var(--orange);font-size:clamp(20px,4.6vw,28px);padding:20px 26px;flex:1 1 260px}
+.playrow .side{flex:0 1 150px}
+.opts{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:16px}
+.opt{border:3px solid var(--line);border-radius:18px;background:var(--card);box-shadow:3px 3px 0 var(--line);
+  cursor:pointer;padding:16px 10px;text-align:center;min-height:120px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:4px}
+.opt .w{font-size:clamp(38px,9vw,58px);line-height:1}
+.opt .m{font-size:14px;color:var(--muted);font-weight:800;visibility:hidden}
+.opt.show .m{visibility:visible}
+.opt.right{background:#d9f5e6;border-color:var(--green)}
+.opt.wrong{background:#ffe0e0;border-color:var(--red)}
+.fb{margin-top:14px;font-size:clamp(18px,3.8vw,24px);font-weight:800;text-align:center;min-height:1.4em}
+.fb.ok{color:var(--green)} .fb.no{color:var(--red)}
+.scorebar{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;font-weight:800;color:var(--muted);font-size:15px;margin-top:6px}
+.scorebar b{color:var(--ink);font-size:19px}
+.note{background:#fffdf6;border:3px dashed var(--line);border-radius:16px;padding:14px 16px;font-size:16px}
+.note h3{margin:0 0 6px;font-size:16px}
+.airlegend{display:block;width:min(430px,100%);margin:12px auto 0}
+.alface{fill:#f7d9c4;stroke:var(--line);stroke-width:2.5}
+.aleye{fill:var(--line)}
+.almouth{stroke:var(--line);stroke-width:2.5;stroke-linecap:round}
+.almouth.thick{stroke-width:4.5}
+.almouth-o{fill:none;stroke:var(--line);stroke-width:2.5}
+.alpaper{fill:none;stroke:var(--blue);stroke-width:3.5;stroke-linecap:round}
+.alpuff{stroke:var(--orange);stroke-width:2.5;stroke-linecap:round}
+.altense{stroke:var(--red);stroke-width:2.5;stroke-linecap:round}
+.alcap{font:800 9px "Segoe UI",system-ui,sans-serif;fill:var(--muted);text-anchor:middle;letter-spacing:.04em}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.toolbar button{min-height:44px;font-size:14px;padding:9px 12px}
+.toolbar button.on{background:var(--ink);color:#fff}
+.warn{display:none;background:#ffe8e8;border:3px solid var(--red);border-radius:14px;padding:10px 14px;font-weight:700;margin-bottom:12px;font-size:15px}
+body.no-voice .warn{display:block}
+body.teacher #play{display:none}
+body.teacher #teachcue{display:block}
+#teachcue{display:none;text-align:center;font-size:clamp(20px,5vw,30px);font-weight:800;
+  border:4px dashed var(--line);border-radius:16px;padding:16px;background:#fffdf6;cursor:pointer}
+#teachcue .hidden{filter:blur(14px)}
+.foot{margin-top:8px;color:var(--muted);font-size:13px;text-align:center}
+/* --- shared chrome: nav bar, focus, motion, pack loader --- */
+.appbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-2px 0 14px}
+.appbar a,.appbar button{font:inherit;font-weight:800;font-size:14px;text-decoration:none;
+  color:var(--muted);background:transparent;border:0;box-shadow:none;padding:7px 10px;
+  min-height:40px;display:inline-flex;align-items:center;gap:6px;border-radius:10px;cursor:pointer;transition:none}
+.appbar a:hover,.appbar button:hover{background:rgba(0,0,0,.055);color:var(--ink)}
+.appbar a:active,.appbar button:active{transform:none;box-shadow:none}
+.ab-home{border:2px solid var(--line)!important;color:var(--ink)!important;background:var(--card)!important;
+  box-shadow:2px 2px 0 var(--line)!important}
+.ab-home:active{transform:translate(2px,2px)!important;box-shadow:none!important}
+.ab-step{background:#a63a2e;color:#fbf3e4;font-size:12px;font-weight:800;letter-spacing:.12em;
+  padding:5px 9px;border-radius:7px;box-shadow:inset 0 0 0 2px rgba(251,243,228,.55);margin-left:2px}
+.ab-right{margin-left:auto;display:flex;gap:2px;align-items:center}
+.ab-arrow{font-size:19px;line-height:1;padding:7px 13px}
+.ab-arrow[aria-disabled="true"]{opacity:.25;pointer-events:none}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:4px}
+@keyframes pop{0%{transform:scale(.94)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
+.pop{animation:pop .22s ease-out}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+#abov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(18,18,24,.55);z-index:70;
+  display:none;align-items:center;justify-content:center;padding:14px}
+#abov.on{display:flex}
+#abbox label{display:block;font-weight:800;font-size:14px;margin:14px 0 6px}
+#abbox select,#abbox input[type=range]{width:100%;font:inherit;font-weight:700;
+  border:3px solid var(--line);border-radius:12px;padding:10px;background:var(--card);min-height:46px}
+#abbox input[type=range]{padding:0;height:46px}
+.abhint{font-size:14px;color:var(--muted);margin-top:6px}
+/* --- hanji paper + saekdong band --- */
+body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(rgba(120,90,40,.055) 1px,transparent 1.3px),
+    radial-gradient(rgba(120,90,40,.04) 1px,transparent 1.3px),
+    radial-gradient(rgba(255,255,255,.5) 1.4px,transparent 1.6px);
+  background-size:26px 26px,42px 42px,34px 34px;
+  background-position:0 0,13px 21px,7px 3px;
+}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:5px;z-index:90;pointer-events:none;
+  background:repeating-linear-gradient(90deg,
+    #a8524e 0 44px,#f3ecd9 44px 47px,
+    #c9973f 47px 91px,#f3ecd9 91px 94px,
+    #41678f 94px 138px,#f3ecd9 138px 141px,
+    #4f7d62 141px 185px,#f3ecd9 185px 188px,
+    #6f5590 188px 232px,#f3ecd9 232px 235px);
+  opacity:.85}
+</style>
+<link rel="stylesheet" href="assets/_ui.css">
+</head>
+<body>
+
+<nav class="appbar">
+  <a class="ab-home" href="index.html">‹ All apps</a>
+  <span class="ab-step">04 / 10</span>
+  <span class="ab-right">
+    <a class="ab-arrow" href="03-read-it-loanwords.html" title="Previous app" aria-label="Previous app">‹</a>
+    <a class="ab-arrow" href="05-picture-match.html" title="Next app" aria-label="Next app">›</a>
+    <button id="abSet" title="Voice settings" aria-label="Voice settings">🔊</button>
+  </span>
+</nav>
+
+<div class="warn">🔇 No Korean voice on this device. Switch on <b>Teacher reads</b>: the app shows you the word to say, and the learner listens to you.</div>
+
+<header>
+  <div class="seal">04</div>
+  <div style="flex:1;min-width:200px">
+    <h1>Listen &amp; Choose</h1>
+    <div class="sub">Hear one word: pick which one it was.</div>
+  </div>
+  <div class="toolbar">
+    <button id="tch">🧑‍🏫 Teacher reads: OFF</button>
+    <button id="rom">Aa Romanization: OFF</button>
+  </div>
+</header>
+
+<div class="sets" id="sets"></div>
+
+<div class="panel">
+  <div class="playrow">
+    <button id="play">🔊 &nbsp;Play the word</button>
+    <button class="side" id="slow">🐢 Slowly</button>
+  </div>
+  <div id="teachcue">Say this word out loud:<br><span class="kr hidden" id="cue">—</span>
+    <div style="font-size:14px;font-weight:700;color:var(--muted);margin-top:8px">(tap to unblur)</div>
+  </div>
+  <div class="opts" id="opts"></div>
+  <div class="fb" id="fb"></div>
+  <div class="scorebar">
+    <span>Correct <b id="sc">0</b> / <b id="tt">0</b></span>
+    <span>Streak <b id="st">0</b> 🔥</span>
+    <span>Best <b id="bs">0</b></span>
+  </div>
+  <div class="playrow" style="margin-top:14px"><button id="next" style="flex:1 1 200px">Next word →</button></div>
+</div>
+
+<div class="note" id="note"></div>
+<div class="foot">Space = play again &nbsp;·&nbsp; 1 / 2 / 3 = choose &nbsp;·&nbsp; Enter = next</div>
+
+<script src="_pack.js"></script>
+<script>
+var PACK=(function(){
+  var d=(window.STUDENT_PACK&&typeof window.STUDENT_PACK==='object')?window.STUDENT_PACK:null;
+  function val(k){var v=d&&d[k];if(v==null)return null;if(Array.isArray(v)&&!v.length)return null;return v;}
+  return{data:d,src:d?(d.student||'pack'):'',live:!!d,
+    get:function(k,fb){var v=val(k);return v===null?fb:v;},
+    has:function(k){return val(k)!==null;}};
+})();
+var TTS=(function(){
+  var voices=[], voice=null, pref=null, mult=1;
+  try{var s=JSON.parse(localStorage.getItem('ktts')||'{}');pref=s.voice||null;mult=+s.rate||1;}catch(e){}
+  function save(){try{localStorage.setItem('ktts',JSON.stringify({voice:pref,rate:mult}));}catch(e){}}
+  function korean(){return voices.filter(function(v){return /^ko/i.test(v.lang||'')||/korean|한국/i.test(v.name||'');});}
+  function pick(){
+    voices=(window.speechSynthesis&&speechSynthesis.getVoices())||[];
+    var ks=korean(); voice=null;
+    if(pref) for(var i=0;i<ks.length;i++) if(ks[i].name===pref) voice=ks[i];
+    if(!voice) voice=ks[0]||null;
+    document.body.classList.toggle('no-voice',!voice);
+    if(window.__voicesChanged) window.__voicesChanged(ks,voice);
+  }
+  if(window.speechSynthesis){pick();speechSynthesis.onvoiceschanged=pick;setTimeout(pick,600);}
+  else document.body.classList.add('no-voice');
+  function utt(t,r){
+    var u=new SpeechSynthesisUtterance(t);
+    u.lang='ko-KR'; u.rate=Math.max(.1,Math.min(2,(r||0.82)*mult));
+    if(voice)u.voice=voice; return u;
+  }
+  return {
+    say:function(t,r){if(!window.speechSynthesis||!t)return;
+      try{speechSynthesis.cancel();}catch(e){} speechSynthesis.speak(utt(t,r));},
+    queue:function(list,r){if(!window.speechSynthesis||!list||!list.length)return;
+      try{speechSynthesis.cancel();}catch(e){} list.forEach(function(t){speechSynthesis.speak(utt(t,r));});},
+    voices:korean, current:function(){return voice;},
+    setVoice:function(n){pref=n;pick();save();},
+    rate:function(x){if(x!=null){mult=x;save();} return mult;}
+  };
+})();
+
+function W(w,r,en){return {w:w,r:r,en:en};}
+var BUILTIN=[
+ {group:'ㄱ ㅋ ㄲ', title:'Plain · Aspirated · Tense',
+  note:'<b class="kr">ㄱ</b> = soft, almost no air. Hold your hand in front of your mouth: you feel nothing.<br>'+
+       '<b class="kr">ㅋ</b> = strong puff of air: your hand feels it.<br>'+
+       '<b class="kr">ㄲ</b> = tight and tense, throat squeezed, <i>no</i> air at all.',
+  sets:[
+   [W('공','gong','ball 🏀'),W('콩','kong','bean 🫘')],
+   [W('굴','gul','oyster 🦪'),W('꿀','kkul','honey 🍯')],
+   [W('개','gae','dog 🐕'),W('깨','kkae','sesame 🌰')],
+   [W('그림','geu-rim','picture 🖼️'),W('크림','keu-rim','cream 🍦')],
+   [W('크다','keu-da','to be big 🐘'),W('끄다','kkeu-da','to turn off 🔌')]
+  ]},
+ {group:'ㄷ ㅌ ㄸ', title:'Plain · Aspirated · Tense',
+  note:'Same three-way contrast with the tongue: <b class="kr">ㄷ</b> soft · <b class="kr">ㅌ</b> puff of air · <b class="kr">ㄸ</b> tense.<br>'+
+       '<b class="kr">달 · 탈 · 딸</b> is the classic test: moon, mask, daughter.',
+  sets:[
+   [W('달','dal','moon 🌙'),W('탈','tal','mask 🎭'),W('딸','ttal','daughter 👧')],
+   [W('턱','teok','chin 😮'),W('떡','tteok','rice cake 🍡')],
+   [W('도','do','also, too'),W('또','tto','again 🔁')]
+  ]},
+ {group:'ㅂ ㅍ ㅃ', title:'Plain · Aspirated · Tense',
+  note:'With the lips: <b class="kr">ㅂ</b> soft · <b class="kr">ㅍ</b> puff of air · <b class="kr">ㅃ</b> tense.<br>'+
+       'Hold a piece of paper in front of your mouth: only <b class="kr">ㅍ</b> makes it move.',
+  sets:[
+   [W('불','bul','fire 🔥'),W('풀','pul','grass 🌿'),W('뿔','ppul','horn 🦌')],
+   [W('방','bang','room 🚪'),W('빵','ppang','bread 🍞')],
+   [W('비','bi','rain 🌧️'),W('피','pi','blood 🩸')]
+  ]},
+ {group:'ㅈ ㅊ ㅉ', title:'Plain · Aspirated · Tense',
+  note:'<b class="kr">ㅈ</b> soft "j" · <b class="kr">ㅊ</b> "ch" with air · <b class="kr">ㅉ</b> tense "jj".<br>'+
+       '<b class="kr">자다 · 차다 · 짜다</b>: to sleep, to be cold, to be salty. Three very different meanings!',
+  sets:[
+   [W('자다','ja-da','to sleep 😴'),W('차다','cha-da','to be cold 🥶'),W('짜다','jja-da','to be salty 🧂')],
+   [W('종','jong','bell 🔔'),W('총','chong','gun 🔫')],
+   [W('저','jeo','I (polite) 🙋'),W('처음','cheo-eum','the first time 1️⃣')]
+  ]},
+ {group:'ㅅ ㅆ', title:'Soft s vs sharp ss',
+  note:'<b class="kr">ㅅ</b> is a light "s". <b class="kr">ㅆ</b> is sharper and tenser: like hissing.<br>'+
+       'This pair matters: <b class="kr">사다</b> = <i>to buy</i>, <b class="kr">싸다</b> = <i>to be cheap</i>.',
+  sets:[
+   [W('살','sal','flesh / years old 🎂'),W('쌀','ssal','uncooked rice 🌾')],
+   [W('사다','sa-da','to buy 🛒'),W('싸다','ssa-da','to be cheap 💸')],
+   [W('산','san','mountain 🏔️'),W('싼','ssan','cheap (before a noun)')]
+  ]},
+ {group:'Vowels', title:'ㅓ vs ㅗ, ㅗ vs ㅜ, ㅡ vs ㅜ',
+  note:'<b class="kr">ㅗ</b> and <b class="kr">ㅜ</b> = round lips. <b class="kr">ㅓ</b> and <b class="kr">ㅡ</b> = flat, relaxed lips.<br>'+
+       'Watch the teacher\'s lips, not just the sound.<br><br>'+
+       '⚠️ One thing you do <i>not</i> need to hear: <b class="kr">ㅐ</b> and <b class="kr">ㅔ</b> sound the <b>same</b> in modern Korean. '+
+       'Even Koreans cannot hear a difference: you simply learn which spelling each word uses.',
+  sets:[
+   [W('손','son','hand 🖐️'),W('선','seon','line 📏')],
+   [W('곰','gom','bear 🐻'),W('검','geom','sword ⚔️')],
+   [W('볼','bol','cheek 😊'),W('벌','beol','bee 🐝')],
+   [W('오리','o-ri','duck 🦆'),W('우리','u-ri','we / us 👥')],
+   [W('소','so','cow 🐄'),W('수','su','number 🔢')],
+   [W('굴','gul','oyster 🦪'),W('글','geul','writing ✍️')],
+   [W('구름','gu-reum','cloud ☁️'),W('그림','geu-rim','picture 🖼️')]
+  ]},
+ {group:'Final sounds', title:'받침: the consonant at the bottom',
+  note:'<b class="kr">ㄴ</b> tongue up behind the teeth · <b class="kr">ㅇ</b> back of the throat, "ng" · <b class="kr">ㅁ</b> lips closed.<br>'+
+       'And <b class="kr">ㄱ ㄷ ㅂ</b> at the bottom are <b>stopped</b>: you cut the air off and never release it.',
+  sets:[
+   [W('방','bang','room 🚪'),W('반','ban','half 🌗'),W('밤','bam','night 🌙')],
+   [W('산','san','mountain 🏔️'),W('상','sang','prize 🏆'),W('삼','sam','three 3️⃣')],
+   [W('강','gang','river 🏞️'),W('간','gan','liver 🫀'),W('감','gam','persimmon 🟠')],
+   [W('밥','bap','cooked rice 🍚'),W('밖','bak','outside 🌳'),W('밭','bat','field 🌾')]
+  ]}
+];
+
+var SETS=PACK.get('listening',BUILTIN);
+var set=0, group=null, target=null, answered=false, sc=0, tt=0, st=0, bs=0, showRom=false, teacher=false;
+
+var setsEl=document.getElementById('sets');
+SETS.forEach(function(s,i){
+  var b=document.createElement('button'); b.className='kr'; b.textContent=s.group||('Set '+(i+1));
+  b.onclick=function(){ set=i; sc=0;tt=0;st=0; newQ(); };
+  setsEl.appendChild(b);
+});
+if(SETS.length<2) setsEl.style.display='none';
+
+function pickR(a){ return a[Math.floor(Math.random()*a.length)]; }
+
+/* the paper test, drawn: hold a strip of paper in front of your mouth */
+function airLegend(s){
+  var blob=(s.group||'')+(s.title||'')+(s.note||'');
+  if(!/[ㄲㄸㅃㅆㅉㅋㅌㅍㅊ]/.test(blob)) return '';
+  function face(x,mouth){
+    return '<circle class="alface" cx="'+(x+22)+'" cy="34" r="16"/>'+
+           '<circle class="aleye" cx="'+(x+27)+'" cy="29" r="2"/>'+
+           mouth;
+  }
+  var g='';
+  /* plain: paper hangs straight */
+  g+=face(6,'<line class="almouth" x1="40" y1="40" x2="46" y2="40"/>')+
+     '<line class="alpaper" x1="62" y1="18" x2="62" y2="52"/>'+
+     '<text class="alcap" x="34" y="70">PLAIN: still</text>';
+  /* aspirated: paper blown away */
+  g+=face(96,'<circle class="almouth-o" cx="133" cy="40" r="3.5"/>')+
+     '<path class="alpuff" d="M140,40 h9 M140,34 h13 M140,46 h13"/>'+
+     '<path class="alpaper" d="M158,18 Q170,38 182,48"/>'+
+     '<text class="alcap" x="128" y="70">ASPIRATED: moves!</text>';
+  /* tense: squeezed, paper still */
+  g+=face(186,'<line class="almouth thick" x1="220" y1="40" x2="227" y2="40"/>')+
+     '<path class="altense" d="M203,12 v6 M208,10 v8 M213,12 v6"/>'+
+     '<line class="alpaper" x1="242" y1="18" x2="242" y2="52"/>'+
+     '<text class="alcap" x="216" y="70">TENSE: tight, still</text>';
+  return '<svg class="airlegend" viewBox="0 0 268 76" role="img" aria-label="paper test">'+g+'</svg>';
+}
+function newQ(){
+  [].forEach.call(setsEl.children,function(b,i){ b.className='kr'+(i===set?' on':''); });
+  var s=SETS[set], g=pickR(s.sets);
+  if(s.sets.length>1 && g===group) g=pickR(s.sets);
+  group=g; target=pickR(group); answered=false;
+  document.getElementById('note').innerHTML=(s.title?'<h3>💡 '+s.title+'</h3>':'')+(s.note||'')+airLegend(s);
+  var fb=document.getElementById('fb'); fb.textContent=''; fb.className='fb';
+  var cue=document.getElementById('cue'); cue.textContent=target.w; cue.className='kr hidden';
+  drawOpts(); updScore();
+  if(!teacher) setTimeout(function(){TTS.say(target.w,0.7);},250);
+}
+function drawOpts(){
+  var el=document.getElementById('opts'); el.innerHTML='';
+  group.forEach(function(o){
+    var d=document.createElement('div');
+    var cls='opt'+(showRom||answered?' show':'');
+    if(answered){ if(o===target) cls+=' right'; else if(o.picked) cls+=' wrong'; }
+    d.className=cls;
+    d.innerHTML='<div class="w kr">'+o.w+'</div><div class="m">'+(answered?(o.en||''):(o.r||''))+'</div>';
+    d.onclick=function(){ choose(o); };
+    el.appendChild(d);
+  });
+}
+function choose(o){
+  if(answered) return;
+  answered=true; tt++;
+  group.forEach(function(x){x.picked=false;});
+  o.picked=true;
+  var fb=document.getElementById('fb');
+  if(o===target){
+    sc++; st++; if(st>bs)bs=st;
+    fb.innerHTML='✓ Yes! <span class="kr">'+target.w+'</span>. '+(target.en||'');
+    fb.className='fb ok';
+  }else{
+    st=0;
+    fb.innerHTML='✕ It was <span class="kr">'+target.w+'</span> ('+(target.r||'')+'). '+(target.en||'')+
+      '<br><span style="font-size:.8em;color:var(--muted)">You picked <span class="kr">'+o.w+'</span> = '+(o.en||'')+'</span>';
+    fb.className='fb no';
+  }
+  drawOpts(); updScore(); TTS.say(target.w,0.65);
+}
+function updScore(){
+  document.getElementById('sc').textContent=sc;
+  document.getElementById('tt').textContent=tt;
+  document.getElementById('st').textContent=st;
+  document.getElementById('bs').textContent=bs;
+}
+document.getElementById('play').onclick=function(){ TTS.say(target.w,0.7); };
+document.getElementById('slow').onclick=function(){ TTS.say(target.w,0.35); };
+document.getElementById('next').onclick=newQ;
+document.getElementById('teachcue').onclick=function(){ document.getElementById('cue').className='kr'; };
+document.getElementById('tch').onclick=function(){
+  teacher=!teacher; document.body.classList.toggle('teacher',teacher);
+  this.textContent='🧑‍🏫 Teacher reads: '+(teacher?'ON':'OFF'); this.className=teacher?'on':'';
+};
+document.getElementById('rom').onclick=function(){
+  showRom=!showRom; this.textContent='Aa Romanization: '+(showRom?'ON':'OFF');
+  this.className=showRom?'on':''; drawOpts();
+};
+document.addEventListener('keydown',function(e){
+  if(e.key===' '){e.preventDefault();TTS.say(target.w,0.7);}
+  else if(e.key==='Enter'){e.preventDefault();newQ();}
+  else if(/^[1-4]$/.test(e.key)){ var i=+e.key-1; if(group[i]) choose(group[i]); }
+});
+newQ();
+
+/* --- voice settings popover, shared by all ten apps --- */
+function mountChrome(){
+  var btn=document.getElementById('abSet'); if(!btn) return;
+  var ov=document.createElement('div'); ov.id='abov';
+  ov.innerHTML='<div id="abbox"><h2>🔊 Voice</h2>'+
+    '<p>Windows and macOS ship more than one Korean voice. Some are much clearer than others: try them.</p>'+
+    '<label for="abVoice">Korean voice</label><select id="abVoice"></select>'+
+    '<label for="abRate">Speed. <span id="abRateV">normal</span></label>'+
+    '<input type="range" id="abRate" min="0.5" max="1.3" step="0.05">'+
+    '<div class="abhint">Beginners follow about 30% slower than a native pace.</div>'+
+    '<div class="r"><button id="abTest">🔊 Test</button><button id="abClose">Done</button></div></div>';
+  document.body.appendChild(ov);
+  var sel=ov.querySelector('#abVoice'), rng=ov.querySelector('#abRate'), lab=ov.querySelector('#abRateV');
+  function label(v){return v<0.75?'slow':v<0.95?'a little slow':v<1.1?'normal':'fast';}
+  function fill(list,cur){
+    sel.innerHTML='';
+    if(!list||!list.length){
+      var o=document.createElement('option'); o.textContent='No Korean voice on this device'; o.disabled=true;
+      sel.appendChild(o); sel.disabled=true; return;
+    }
+    sel.disabled=false;
+    list.forEach(function(v){
+      var o=document.createElement('option'); o.value=v.name;
+      o.textContent=v.name+' ('+v.lang+')';
+      if(cur&&v.name===cur.name) o.selected=true;
+      sel.appendChild(o);
+    });
+  }
+  window.__voicesChanged=fill;
+  fill(TTS.voices(),TTS.current());
+  rng.value=TTS.rate(); lab.textContent=label(TTS.rate());
+  sel.onchange=function(){TTS.setVoice(this.value);TTS.say('안녕하세요');};
+  rng.oninput=function(){TTS.rate(+this.value);lab.textContent=label(+this.value);};
+  rng.onchange=function(){TTS.say('안녕하세요. 만나서 반가워요.');};
+  ov.querySelector('#abTest').onclick=function(){TTS.say('안녕하세요. 만나서 반가워요.');};
+  ov.querySelector('#abClose').onclick=function(){ov.className='';};
+  ov.onclick=function(e){if(e.target===ov)ov.className='';};
+  btn.onclick=function(){ov.className='on';};
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')ov.className='';});
+}
+
+mountChrome();
+</script>
+
+<script src="assets/_progress.js"></script>
+<script>
+Progress.visit('04');
+/* 다음 화면으로 넘어가는 큰 링크를 누르면 그 화면을 끝낸 것으로 본다 */
+document.addEventListener('click',function(e){
+  var t=e.target; while(t&&t!==document){ if(t.classList&&t.classList.contains('onward')){ Progress.done('04'); break; } t=t.parentNode; }
+},true);
+</script>
+</body>
+</html>

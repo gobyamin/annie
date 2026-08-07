@@ -1,0 +1,8 @@
+# OS 쓰레기
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# 편집 중 백업
+*.bak
+*~

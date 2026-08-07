@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sentence Builder</title>
+<style>
+:root{
+  /* hanji paper and meok ink */
+  --bg:#f7efdd; --card:#fffdf6; --ink:#221c14; --muted:#6b6353; --line:#221c14;
+  /* obangsaek-leaning accents: 청 홍 황 녹 자 */
+  --blue:#1d5fa9; --orange:#d46508; --green:#2c7a57; --red:#bf3b2e; --purple:#6d3fae;
+  /* tinted hanji surfaces */
+  --sky:#eef2f7; --mint:#edf2ec; --blush:#f7ece7; --amber:#f7f1dc; --paper2:#fbf7ec;
+  --hair:#ded2b8;
+  /* depth */
+  --sh:4px 4px 0 var(--line); --sh1:2px 2px 0 var(--line);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  font-size:17px;line-height:1.45;padding:18px 14px 30px;max-width:1000px;margin:0 auto}
+.kr{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;font-weight:800;word-break:keep-all}
+h1{font-size:clamp(20px,4.4vw,30px);margin:0;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:14px;margin-top:2px}
+header{margin-bottom:10px}
+button{font:inherit;font-weight:700;cursor:pointer;border:3px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:12px;padding:10px 14px;min-height:46px;box-shadow:2px 2px 0 var(--line);transition:transform .06s,box-shadow .06s}
+button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--line)}
+.levels{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+.levels button{border-radius:999px;padding:9px 15px;min-height:44px;font-size:15px}
+.levels button.on{background:var(--purple);color:#fff}
+.panel{background:var(--card);border:3px solid var(--line);border-radius:22px;box-shadow:var(--sh);padding:18px;margin-bottom:14px}
+.count{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.06em}
+.prompt{font-size:clamp(22px,5.2vw,34px);font-weight:800;margin:6px 0 2px;line-height:1.25}
+.promptsub{color:var(--muted);font-weight:700;font-size:15px}
+.slots{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 8px;min-height:82px;align-items:center;
+  border:4px dashed var(--line);border-radius:18px;padding:12px;background:#fffdf6}
+.slots.ok{background:#e7fbef;border-style:solid;border-color:var(--green)}
+.slots.no{background:#ffeaea;border-style:solid;border-color:var(--red);animation:shake .32s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.slots .ph{color:#c8c2b2;font-size:clamp(22px,5vw,32px);font-weight:800}
+.tray{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;min-height:60px}
+.chunk{border:3px solid var(--line);border-radius:14px;background:var(--card);box-shadow:3px 3px 0 var(--line);
+  cursor:pointer;padding:10px 16px;font-size:clamp(24px,5.6vw,38px);line-height:1.15;min-height:58px;
+  display:flex;align-items:center}
+.chunk.placed{background:#e9f0ff}
+.chunk.used{visibility:hidden}
+.fb{margin-top:12px;font-size:clamp(17px,3.6vw,22px);font-weight:800;min-height:1.4em}
+.fb.ok{color:var(--green)} .fb.no{color:var(--red)}
+.rom{color:var(--blue);font-weight:800;font-size:clamp(14px,3vw,18px);margin-top:2px}
+.note{margin-top:12px;background:#fff6d9;border:3px dashed var(--line);border-radius:14px;padding:11px 14px;
+  font-size:clamp(15px,3.1vw,18px);display:none}
+.note.show{display:block}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.acts button{flex:1 1 150px}
+#next{background:var(--orange)}
+.sov{display:grid;gap:10px;grid-template-columns:1fr 1fr;font-size:15px}
+@media(max-width:620px){.sov{grid-template-columns:1fr}}
+.sovbox{border:3px solid var(--line);border-radius:14px;padding:12px 14px}
+.sovbox.en{background:#f2f2f5}
+.sovbox.ko{background:#eef3ff}
+.sovbox h4{margin:0 0 6px;font-size:15px;letter-spacing:.04em;color:var(--muted)}
+.tag{display:inline-block;border-radius:6px;padding:1px 7px;font-size:12px;font-weight:800;color:#fff;margin-right:4px}
+.tS{background:#2f6df6}.tO{background:#ff8a3d}.tV{background:#12855a}
+.bar{height:14px;border:3px solid var(--line);border-radius:999px;background:var(--card);overflow:hidden;margin-bottom:12px}
+.bar i{display:block;height:100%;background:var(--green);width:0%;transition:width .25s}
+.warn{display:none;background:#ffe8e8;border:3px solid var(--red);border-radius:14px;padding:10px 14px;font-weight:700;margin-bottom:12px;font-size:15px}
+body.no-voice .warn{display:block}
+.foot{margin-top:10px;color:var(--muted);font-size:13px;text-align:center}
+/* --- shared chrome: nav bar, focus, motion, pack loader --- */
+.appbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-2px 0 14px}
+.appbar a,.appbar button{font:inherit;font-weight:800;font-size:14px;text-decoration:none;
+  color:var(--muted);background:transparent;border:0;box-shadow:none;padding:7px 10px;
+  min-height:40px;display:inline-flex;align-items:center;gap:6px;border-radius:10px;cursor:pointer;transition:none}
+.appbar a:hover,.appbar button:hover{background:rgba(0,0,0,.055);color:var(--ink)}
+.appbar a:active,.appbar button:active{transform:none;box-shadow:none}
+.ab-home{border:2px solid var(--line)!important;color:var(--ink)!important;background:var(--card)!important;
+  box-shadow:2px 2px 0 var(--line)!important}
+.ab-home:active{transform:translate(2px,2px)!important;box-shadow:none!important}
+.ab-step{background:#a63a2e;color:#fbf3e4;font-size:12px;font-weight:800;letter-spacing:.12em;
+  padding:5px 9px;border-radius:7px;box-shadow:inset 0 0 0 2px rgba(251,243,228,.55);margin-left:2px}
+.ab-right{margin-left:auto;display:flex;gap:2px;align-items:center}
+.ab-arrow{font-size:19px;line-height:1;padding:7px 13px}
+.ab-arrow[aria-disabled="true"]{opacity:.25;pointer-events:none}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:4px}
+@keyframes pop{0%{transform:scale(.94)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
+.pop{animation:pop .22s ease-out}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+#abov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(18,18,24,.55);z-index:70;
+  display:none;align-items:center;justify-content:center;padding:14px}
+#abov.on{display:flex}
+#abbox label{display:block;font-weight:800;font-size:14px;margin:14px 0 6px}
+#abbox select,#abbox input[type=range]{width:100%;font:inherit;font-weight:700;
+  border:3px solid var(--line);border-radius:12px;padding:10px;background:var(--card);min-height:46px}
+#abbox input[type=range]{padding:0;height:46px}
+.abhint{font-size:14px;color:var(--muted);margin-top:6px}
+/* --- hanji paper + saekdong band --- */
+body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(rgba(120,90,40,.055) 1px,transparent 1.3px),
+    radial-gradient(rgba(120,90,40,.04) 1px,transparent 1.3px),
+    radial-gradient(rgba(255,255,255,.5) 1.4px,transparent 1.6px);
+  background-size:26px 26px,42px 42px,34px 34px;
+  background-position:0 0,13px 21px,7px 3px;
+}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:5px;z-index:90;pointer-events:none;
+  background:repeating-linear-gradient(90deg,
+    #a8524e 0 44px,#f3ecd9 44px 47px,
+    #c9973f 47px 91px,#f3ecd9 91px 94px,
+    #41678f 94px 138px,#f3ecd9 138px 141px,
+    #4f7d62 141px 185px,#f3ecd9 185px 188px,
+    #6f5590 188px 232px,#f3ecd9 232px 235px);
+  opacity:.85}
+header{display:flex;flex-wrap:wrap;gap:11px;align-items:flex-start}
+</style>
+<link rel="stylesheet" href="assets/_ui.css">
+</head>
+<body>
+
+<nav class="appbar">
+  <a class="ab-home" href="index.html">‹ All apps</a>
+  <span class="ab-step">08 / 10</span>
+  <span class="ab-right">
+    <a class="ab-arrow" href="07-survival-korean.html" title="Previous app" aria-label="Previous app">‹</a>
+    <a class="ab-arrow" href="09-particle-picker.html" title="Next app" aria-label="Next app">›</a>
+    <button id="abSet" title="Voice settings" aria-label="Voice settings">🔊</button>
+  </span>
+</nav>
+
+<div class="warn">🔇 No Korean voice on this device: the 🔊 button will be silent. Read the finished sentence aloud together.</div>
+
+<header>
+  <div class="seal">08</div>
+  <div>
+  <h1>Sentence Builder</h1>
+  <div class="sub">Tap the blocks in the right order. In Korean the verb is <b>always last</b>.</div>
+  </div>
+</header>
+
+<div class="levels" id="levels"></div>
+<div class="bar"><i id="fill"></i></div>
+
+<div class="panel">
+  <div class="count" id="count"></div>
+  <div class="prompt" id="prompt"></div>
+  <div class="promptsub">Build this sentence in Korean:</div>
+
+  <div class="slots" id="slots"></div>
+  <div class="tray" id="tray"></div>
+
+  <div class="fb" id="fb"></div>
+  <div class="rom" id="rom"></div>
+  <div class="note" id="note"></div>
+
+  <div class="acts">
+    <button id="undo">↩ Take one back</button>
+    <button id="show">👀 Show answer</button>
+    <button id="say">🔊 Hear it</button>
+    <button id="next">Next →</button>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="sov">
+    <div class="sovbox en"><h4>ENGLISH · S V O</h4>
+      <div><span class="tag tS">S</span>I &nbsp; <span class="tag tV">V</span>eat &nbsp; <span class="tag tO">O</span>rice</div></div>
+    <div class="sovbox ko"><h4>KOREAN · S O V</h4>
+      <div class="kr" style="font-size:20px"><span class="tag tS">S</span>저는 &nbsp; <span class="tag tO">O</span>밥을 &nbsp; <span class="tag tV">V</span>먹어요</div></div>
+  </div>
+  <div style="margin-top:12px;font-size:15px;color:var(--muted);font-weight:700">
+    Order of the extras: <b>when</b> → <b>where</b> → <b>what</b> → <b>verb</b>.
+    &nbsp;<span class="kr">저는 내일 카페에서 커피를 마셔요.</span>
+  </div>
+</div>
+
+<div class="foot">Tap a placed block to send it back. The check happens automatically when the last block lands.</div>
+
+<script src="_pack.js"></script>
+<script>
+var PACK=(function(){
+  var d=(window.STUDENT_PACK&&typeof window.STUDENT_PACK==='object')?window.STUDENT_PACK:null;
+  function val(k){var v=d&&d[k];if(v==null)return null;if(Array.isArray(v)&&!v.length)return null;return v;}
+  return{data:d,src:d?(d.student||'pack'):'',live:!!d,
+    get:function(k,fb){var v=val(k);return v===null?fb:v;},
+    has:function(k){return val(k)!==null;}};
+})();
+function groupBy(list,def){
+  var order=[],map={};
+  list.forEach(function(it){var g=it.group||def;if(!map[g]){map[g]=[];order.push(g);}map[g].push(it);});
+  return order.map(function(g){return{name:g,items:map[g]};});
+}
+var TTS=(function(){
+  var voices=[], voice=null, pref=null, mult=1;
+  try{var s=JSON.parse(localStorage.getItem('ktts')||'{}');pref=s.voice||null;mult=+s.rate||1;}catch(e){}
+  function save(){try{localStorage.setItem('ktts',JSON.stringify({voice:pref,rate:mult}));}catch(e){}}
+  function korean(){return voices.filter(function(v){return /^ko/i.test(v.lang||'')||/korean|한국/i.test(v.name||'');});}
+  function pick(){
+    voices=(window.speechSynthesis&&speechSynthesis.getVoices())||[];
+    var ks=korean(); voice=null;
+    if(pref) for(var i=0;i<ks.length;i++) if(ks[i].name===pref) voice=ks[i];
+    if(!voice) voice=ks[0]||null;
+    document.body.classList.toggle('no-voice',!voice);
+    if(window.__voicesChanged) window.__voicesChanged(ks,voice);
+  }
+  if(window.speechSynthesis){pick();speechSynthesis.onvoiceschanged=pick;setTimeout(pick,600);}
+  else document.body.classList.add('no-voice');
+  function utt(t,r){
+    var u=new SpeechSynthesisUtterance(t);
+    u.lang='ko-KR'; u.rate=Math.max(.1,Math.min(2,(r||0.82)*mult));
+    if(voice)u.voice=voice; return u;
+  }
+  return {
+    say:function(t,r){if(!window.speechSynthesis||!t)return;
+      try{speechSynthesis.cancel();}catch(e){} speechSynthesis.speak(utt(t,r));},
+    queue:function(list,r){if(!window.speechSynthesis||!list||!list.length)return;
+      try{speechSynthesis.cancel();}catch(e){} list.forEach(function(t){speechSynthesis.speak(utt(t,r));});},
+    voices:korean, current:function(){return voice;},
+    setVoice:function(n){pref=n;pick();save();},
+    rate:function(x){if(x!=null){mult=x;save();} return mult;}
+  };
+})();
+
+function S(g,en,chunks,r,note){return {group:g,en:en,chunks:chunks,r:r,note:note};}
+var BUILTIN=[
+ S('① 3 blocks','I eat rice.',['저는','밥을','먹어요'],'jeo-neun bap-eul meo-geo-yo',
+   'The verb <span class="kr">먹어요</span> goes <b>last</b>. English says "I eat rice", Korean says "I rice eat".'),
+ S('① 3 blocks','I am a student.',['저는','학생','이에요'],'jeo-neun hak-saeng i-e-yo',
+   '<span class="kr">이에요</span> = "am / is / are". It also comes last.'),
+ S('① 3 blocks','I drink coffee.',['저는','커피를','마셔요'],'jeo-neun keo-pi-reul ma-syeo-yo',
+   '<span class="kr">를</span> marks the thing you drink: the object.'),
+ S('① 3 blocks','I go to school.',['저는','학교에','가요'],'jeo-neun hak-gyo-e ga-yo',
+   '<span class="kr">에</span> = "to" a place, when you are moving there.'),
+ S('① 3 blocks','I like kimchi.',['저는','김치를','좋아해요'],'jeo-neun gim-chi-reul jo-a-hae-yo',
+   'Korean says "I kimchi like".'),
+ S('① 3 blocks','I read a book.',['저는','책을','읽어요'],'jeo-neun chae-geul il-geo-yo',
+   '<span class="kr">책</span> ends in a consonant, so the object marker is <span class="kr">을</span>, not <span class="kr">를</span>.'),
+ S('① 3 blocks','This is water.',['이거','물','이에요'],'i-geo mul i-e-yo',
+   '<span class="kr">이거</span> = "this thing". Very useful when pointing at a menu.'),
+ S('① 3 blocks','My friend is Korean.',['제 친구는','한국 사람','이에요'],'je chin-gu-neun han-guk sa-ram i-e-yo',
+   '<span class="kr">한국 사람</span> = "Korea person" = Korean.'),
+
+ S('② 4 blocks','I eat rice at home.',['저는','집에서','밥을','먹어요'],'jeo-neun ji-be-seo bap-eul meo-geo-yo',
+   '<span class="kr">에서</span> = "at / in", for the place where an <b>action</b> happens. The place comes before the object.'),
+ S('② 4 blocks','I go to school every day.',['저는','매일','학교에','가요'],'jeo-neun mae-il hak-gyo-e ga-yo',
+   'Time words like <span class="kr">매일</span> (every day) come <b>early</b> in the sentence.'),
+ S('② 4 blocks','I meet a friend tomorrow.',['저는','내일','친구를','만나요'],'jeo-neun nae-il chin-gu-reul man-na-yo',
+   'Korean has no future tense here. <span class="kr">내일</span> (tomorrow) is enough.'),
+ S('② 4 blocks','I drink coffee at the café.',['저는','카페에서','커피를','마셔요'],'jeo-neun ka-pe-e-seo keo-pi-reul ma-syeo-yo',
+   'when → where → what → verb.'),
+ S('② 4 blocks','I buy bread at the shop.',['저는','가게에서','빵을','사요'],'jeo-neun ga-ge-e-seo ppang-eul sa-yo',
+   '<span class="kr">에서</span> again: buying is an action happening at the shop.'),
+ S('② 4 blocks','I watch TV in the evening.',['저는','저녁에','티브이를','봐요'],'jeo-neun jeo-nyeo-ge ti-beu-i-reul bwa-yo',
+   '<span class="kr">에</span> is also used for time: <span class="kr">저녁에</span> = in the evening.'),
+ S('② 4 blocks','I study Korean at home.',['저는','집에서','한국어를','공부해요'],'jeo-neun ji-be-seo han-gu-geo-reul gong-bu-hae-yo',
+   '<span class="kr">공부해요</span> = study. Many verbs end in <span class="kr">-해요</span>.'),
+ S('② 4 blocks','What do you usually do on the weekend?',['주말에','보통','뭐','해요?'],'ju-ma-re bo-tong mwo hae-yo',
+   'A question keeps the same word order: just raise your voice at the end.'),
+
+ S('③ 5 blocks · negatives','I do not eat meat.',['저는','고기를','안','먹어요'],'jeo-neun go-gi-reul an meo-geo-yo',
+   '<span class="kr">안</span> makes it negative and sits <b>right in front of the verb</b>.'),
+ S('③ 5 blocks · negatives','I do not drink coffee in the evening.',['저는','저녁에','커피를','안','마셔요'],'jeo-neun jeo-nyeo-ge keo-pi-reul an ma-syeo-yo',
+   'Everything else stays the same: only <span class="kr">안</span> is added before the verb.'),
+ S('③ 5 blocks · negatives','I go to work at nine in the morning.',['저는','아침','아홉 시에','회사에','가요'],'jeo-neun a-chim a-hop si-e hoe-sa-e ga-yo',
+   'The hour uses <b>native</b> numbers: <span class="kr">아홉 시</span>.'),
+ S('③ 5 blocks · negatives','On Saturday I meet a friend at the café.',['저는','토요일에','카페에서','친구를','만나요'],'jeo-neun to-yo-i-re ka-pe-e-seo chin-gu-reul man-na-yo',
+   'when (<span class="kr">토요일에</span>) → where (<span class="kr">카페에서</span>) → what (<span class="kr">친구를</span>) → verb.'),
+ S('③ 5 blocks · negatives','Please give me one americano.',['아메리카노','한 잔','주세요'],'a-me-ri-ka-no han jan ju-se-yo',
+   '<span class="kr">주세요</span> = "please give me". Put it at the end of almost any order.'),
+ S('③ 5 blocks · negatives','Excuse me, where is the toilet?',['저기요,','화장실이','어디예요?'],'jeo-gi-yo, hwa-jang-si-ri eo-di-ye-yo',
+   '<span class="kr">어디예요?</span> = "where is it?": always at the end.'),
+ S('③ 5 blocks · negatives','How much is this?',['이거','얼마예요?'],'i-geo eol-ma-ye-yo',
+   'Two blocks, and you can shop with it.'),
+ S('③ 5 blocks · negatives','Last year I lived in Korea.',['저는','작년에','한국에서','살았어요'],'jeo-neun jang-nyeo-ne han-gu-ge-seo sa-ra-sseo-yo',
+   'Past tense: <span class="kr">-았어요 / -었어요</span> instead of <span class="kr">-아요 / -어요</span>.')
+];
+
+var GROUPS=groupBy(PACK.get('sentences',BUILTIN),'🧱 Sentences');
+var gi=0, qi=0, placed=[], solved=false, list=[];
+
+var lvEl=document.getElementById('levels');
+GROUPS.forEach(function(g,i){
+  var b=document.createElement('button'); b.textContent=g.name;
+  b.onclick=function(){ gi=i; qi=0; load(); }; lvEl.appendChild(b);
+});
+if(GROUPS.length<2) lvEl.style.display='none';
+
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function load(){
+  [].forEach.call(lvEl.children,function(b,i){ b.className=i===gi?'on':''; });
+  list=GROUPS[gi].items;
+  if(qi>=list.length) qi=0;
+  var q=list[qi];
+  placed=[]; solved=false;
+  var idx=q.chunks.map(function(c,i){return i;});
+  do{ shuffle(idx); }while(q.chunks.length>2 && idx.join()===q.chunks.map(function(c,i){return i;}).join());
+  q._order=idx;
+  render();
+}
+function render(){
+  var q=list[qi];
+  document.getElementById('fill').style.width=Math.round(qi/list.length*100)+'%';
+  document.getElementById('count').textContent=GROUPS[gi].name.toUpperCase()+' · '+(qi+1)+' / '+list.length;
+  document.getElementById('prompt').textContent=q.en;
+
+  var sl=document.getElementById('slots');
+  sl.className='slots'+(solved?' ok':'');
+  sl.innerHTML='';
+  if(!placed.length) sl.innerHTML='<span class="ph">tap the blocks below…</span>';
+  placed.forEach(function(ci,pos){
+    var d=document.createElement('div');
+    d.className='chunk placed kr'; d.textContent=q.chunks[ci];
+    d.onclick=function(){ if(solved)return; placed.splice(pos,1); render(); };
+    sl.appendChild(d);
+  });
+
+  var tr=document.getElementById('tray'); tr.innerHTML='';
+  q._order.forEach(function(ci){
+    var d=document.createElement('div');
+    d.className='chunk kr'+(placed.indexOf(ci)>=0?' used':'');
+    d.textContent=q.chunks[ci];
+    d.onclick=function(){ if(solved||placed.indexOf(ci)>=0)return; placed.push(ci); check(); };
+    tr.appendChild(d);
+  });
+
+  document.getElementById('rom').textContent = solved ? (q.r||'') : '';
+  var nt=document.getElementById('note');
+  nt.className='note'+(solved&&q.note?' show':''); nt.innerHTML=q.note||'';
+}
+function full(){ return placed.join(' '); }
+function check(){
+  var q=list[qi];
+  if(placed.length<q.chunks.length){ render(); return; }
+  var right=placed.every(function(ci,i){ return q.chunks[ci]===q.chunks[i]; });
+  var fb=document.getElementById('fb');
+  if(right){
+    solved=true; render();
+    var slots=document.getElementById("slots"); if(slots) slots.className+=" pop";
+    fb.textContent='✓ Correct! Say it out loud.'; fb.className='fb ok';
+    TTS.say(q.chunks.join(' '),0.8);
+  }else{
+    render();
+    var sl=document.getElementById('slots'); sl.className='slots no';
+    fb.textContent='✕ Not quite. Remember: the verb goes last.'; fb.className='fb no';
+    setTimeout(function(){ placed=[]; document.getElementById('fb').textContent=''; render(); },900);
+  }
+}
+document.getElementById('undo').onclick=function(){ if(solved)return; placed.pop(); render(); };
+document.getElementById('show').onclick=function(){
+  var q=list[qi];
+  placed=q.chunks.map(function(c,i){return i;}); solved=true; render();
+  var fb=document.getElementById('fb'); fb.textContent='👀 Here it is, now say it yourself.'; fb.className='fb';
+  TTS.say(q.chunks.join(' '),0.8);
+};
+document.getElementById('say').onclick=function(){ TTS.say(list[qi].chunks.join(' '),0.8); };
+document.getElementById('next').onclick=function(){
+  qi=(qi+1)%list.length; document.getElementById('fb').textContent=''; load();
+};
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'){e.preventDefault();document.getElementById('next').click();}
+  else if(e.key==='Backspace'){e.preventDefault();document.getElementById('undo').click();}
+  else if(e.key===' '){e.preventDefault();TTS.say(list[qi].chunks.join(' '),0.8);}
+});
+load();
+
+/* --- voice settings popover, shared by all ten apps --- */
+function mountChrome(){
+  var btn=document.getElementById('abSet'); if(!btn) return;
+  var ov=document.createElement('div'); ov.id='abov';
+  ov.innerHTML='<div id="abbox"><h2>🔊 Voice</h2>'+
+    '<p>Windows and macOS ship more than one Korean voice. Some are much clearer than others: try them.</p>'+
+    '<label for="abVoice">Korean voice</label><select id="abVoice"></select>'+
+    '<label for="abRate">Speed. <span id="abRateV">normal</span></label>'+
+    '<input type="range" id="abRate" min="0.5" max="1.3" step="0.05">'+
+    '<div class="abhint">Beginners follow about 30% slower than a native pace.</div>'+
+    '<div class="r"><button id="abTest">🔊 Test</button><button id="abClose">Done</button></div></div>';
+  document.body.appendChild(ov);
+  var sel=ov.querySelector('#abVoice'), rng=ov.querySelector('#abRate'), lab=ov.querySelector('#abRateV');
+  function label(v){return v<0.75?'slow':v<0.95?'a little slow':v<1.1?'normal':'fast';}
+  function fill(list,cur){
+    sel.innerHTML='';
+    if(!list||!list.length){
+      var o=document.createElement('option'); o.textContent='No Korean voice on this device'; o.disabled=true;
+      sel.appendChild(o); sel.disabled=true; return;
+    }
+    sel.disabled=false;
+    list.forEach(function(v){
+      var o=document.createElement('option'); o.value=v.name;
+      o.textContent=v.name+' ('+v.lang+')';
+      if(cur&&v.name===cur.name) o.selected=true;
+      sel.appendChild(o);
+    });
+  }
+  window.__voicesChanged=fill;
+  fill(TTS.voices(),TTS.current());
+  rng.value=TTS.rate(); lab.textContent=label(TTS.rate());
+  sel.onchange=function(){TTS.setVoice(this.value);TTS.say('안녕하세요');};
+  rng.oninput=function(){TTS.rate(+this.value);lab.textContent=label(+this.value);};
+  rng.onchange=function(){TTS.say('안녕하세요. 만나서 반가워요.');};
+  ov.querySelector('#abTest').onclick=function(){TTS.say('안녕하세요. 만나서 반가워요.');};
+  ov.querySelector('#abClose').onclick=function(){ov.className='';};
+  ov.onclick=function(e){if(e.target===ov)ov.className='';};
+  btn.onclick=function(){ov.className='on';};
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')ov.className='';});
+}
+
+mountChrome();
+</script>
+
+<script src="assets/_progress.js"></script>
+<script>
+Progress.visit('08');
+/* 다음 화면으로 넘어가는 큰 링크를 누르면 그 화면을 끝낸 것으로 본다 */
+document.addEventListener('click',function(e){
+  var t=e.target; while(t&&t!==document){ if(t.classList&&t.classList.contains('onward')){ Progress.done('08'); break; } t=t.parentNode; }
+},true);
+</script>
+</body>
+</html>
