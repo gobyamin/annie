@@ -47,14 +47,8 @@ var LESSONS = [
     items: [
       { kind:'deck', file:'l-260807.html',
         label:'Everything from Friday', sub:'12 cards. Tap the tiles, they say themselves' },
-      { kind:'app', app:'01d-vowels.html',
-        label:'The vowels on their own', sub:'tap any one to hear it' },
-      { kind:'app', app:'01-hangul-letter-lab.html',
-        label:'The consonant story', sub:'the pictures, one at a time' },
       { kind:'tool', file:'blocks.html',
-        label:'Build a word', sub:'커피 · 타투 · 차은우 · 올리브영. Or type your own' },
-      { kind:'app', app:'02-syllable-builder.html',
-        label:'Build a block', sub:'put the letters together yourself' }
+        label:'Build a word', sub:'커피 · 타투 · 차은우 · 올리브영. Or type your own' }
     ],
     words: [
       'w-coffee','w-radio','w-school','w-friend','w-house','w-mountain',
