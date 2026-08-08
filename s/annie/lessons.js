@@ -59,7 +59,8 @@ var LESSONS = [
       'w-dog','w-cat','w-babo','w-hand','w-money','w-room',
       'f-mom','f-dad','f-oppa','f-nuna','f-eonni','f-dongsaeng','f-maknae',
       'num-1','num-2','num-3','num-4','num-5','num-6','num-7','num-8','num-9','num-10',
-      'thanks','s-eaten','s-fine','s-tea','s-yes','s-no'
+      'thanks','s-eaten','s-fine','s-tea','s-yes','s-no',
+      'n-eunwoo','n-astro','sp-1','sp-2'
     ]
   }
 

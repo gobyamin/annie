@@ -102,7 +102,16 @@ var BANK = {
   's-fine':        { kr:'괜찮아요', en:'I am fine / no thanks', tag:'phrase' },
   's-tea':         { kr:'차 줘요', en:'give me tea (she built this herself)', tag:'phrase' },
   's-yes':         { kr:'네', en:'yes, polite', tag:'phrase' },
-  's-no':          { kr:'아니요', en:'no, polite', tag:'phrase' }
+  's-no':          { kr:'아니요', en:'no, polite', tag:'phrase' },
+
+  /* 최애와 매운맛. 2회차 뒤 추가 */
+  'n-eunwoo':      { kr:'차은우', en:'Cha Eun-woo, ASTRO', tag:'name',
+                     note:'Her bias. Every letter is one she already knows.' },
+  'n-astro':       { kr:'아스트로', en:'ASTRO', tag:'name' },
+  'sp-1':          { kr:'개새끼', en:'strong insult, aimed at a person', tag:'spicy',
+                     note:'Understand pile, not say pile. She asked for it.' },
+  'sp-2':          { kr:'씨발', en:'the strongest one, like the f word', tag:'spicy',
+                     note:'Never to someone older. She will hear it in every drama.' }
 };
 
 if (typeof module !== 'undefined') module.exports = { BANK };
