@@ -35,21 +35,36 @@ var LESSONS = [
     words: ['hello', 'nice', 'bye-going', 'bye-stay', 'good', 'sleepwell', 'n-kimareum']
   }
 
-  /* 2회차(8/7)는 수업이 끝난 뒤에 여기 추가한다. 틀은 이렇다:
-
   ,{
     n: 2,
     date: '2026-08-07',
-    title: 'Five vowels you already know',
-    did: ['ㅏㅔㅣㅗㅜ', 'ㅇ', 'ㄴ', '애니 쓰기'],
-    summary: '',
+    title: 'All forty letters, in one very long day',
+    did: ['자모 40', 'numbers', 'family', '받침', '존댓말'],
+    summary: 'My connection ruined the first lesson, so we did a second one at night. ' +
+             'Between them we got through the whole alphabet, one to ten, your family words ' +
+             'and about thirty words. That is a lot for one day. None of it is homework.',
     items: [
-      { kind:'app', app:'01d-vowels.html', label:'The vowels', sub:'tap any one to hear it' },
-      { kind:'app', app:'02-syllable-builder.html', label:'Build your name', sub:'아 + 니 = 애니' }
+      { kind:'deck', file:'l-260807.html',
+        label:'Everything from Friday', sub:'12 cards. Tap the tiles, they say themselves' },
+      { kind:'app', app:'01d-vowels.html',
+        label:'The vowels on their own', sub:'tap any one to hear it' },
+      { kind:'app', app:'01-hangul-letter-lab.html',
+        label:'The consonant story', sub:'the pictures, one at a time' },
+      { kind:'app', app:'02-syllable-builder.html',
+        label:'Build a block', sub:'put the letters together yourself' }
     ],
-    words: ['v-a','v-e','v-i','v-o','v-u','c-ng','c-n']
+    words: [
+      'w-coffee','w-radio','w-school','w-friend','w-house','w-mountain',
+      'w-karaoke','w-daebak','w-mwohae','w-aegyo','w-me','w-you','w-cha',
+      'w-dog','w-cat','w-babo','w-hand','w-money','w-room',
+      'f-mom','f-dad','f-oppa','f-nuna','f-eonni','f-dongsaeng','f-maknae',
+      'num-1','num-2','num-3','num-4','num-5','num-6','num-7','num-8','num-9','num-10',
+      'thanks','s-eaten','s-fine','s-tea','s-yes','s-no'
+    ]
   }
 
-  */
+  /* 3회차는 수업이 끝난 뒤에 여기에. 위 덩어리를 복사해서 날짜와 내용만 바꾼다.
+     ⚠️ 지나간 회차는 고치지 않는다. */
+
 
 ];

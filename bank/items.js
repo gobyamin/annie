@@ -55,7 +55,54 @@ var BANK = {
   'c-n':  { kr:'ㄴ', en:'n', tag:'consonant', tts:'sound-n' },
   'c-ng': { kr:'ㅇ', en:'silent at the front', tag:'consonant', tts:'sound-ng',
             note:'At the front of a block it just holds the seat.' }
+,
 
+  /* 2회차(8/7) 에 나간 것 */
+  'w-coffee':      { kr:'커피', en:'coffee', tag:'word', tts:'word-keopi' },
+  'w-radio':       { kr:'라디오', en:'radio', tag:'word', tts:'word-radio' },
+  'w-school':      { kr:'학교', en:'school', tag:'word', tts:'word-hakgyo' },
+  'w-friend':      { kr:'친구', en:'friend', tag:'word', tts:'word-chingu' },
+  'w-house':       { kr:'집', en:'house', tag:'word', tts:'word-jip' },
+  'w-mountain':    { kr:'산', en:'mountain', tag:'word', tts:'word-san' },
+  'w-karaoke':     { kr:'노래방', en:'karaoke room', tag:'word' },
+  'w-daebak':      { kr:'대박', en:'no way!', tag:'word' },
+  'w-mwohae':      { kr:'뭐해', en:'whatcha doing', tag:'word' },
+  'w-aegyo':       { kr:'애교', en:'cute act', tag:'word' },
+  'w-me':          { kr:'나', en:'me', tag:'word' },
+  'w-you':         { kr:'너', en:'you', tag:'word' },
+  'w-cha':         { kr:'차', en:'car, and also tea', tag:'word' },
+  'w-dog':         { kr:'개', en:'dog', tag:'word' },
+  'w-cat':         { kr:'고양이', en:'cat', tag:'word' },
+  'w-babo':        { kr:'바보', en:'silly', tag:'word' },
+  'w-hand':        { kr:'손', en:'hand', tag:'word' },
+  'w-money':       { kr:'돈', en:'money', tag:'word' },
+  'w-room':        { kr:'방', en:'room', tag:'word' },
+  /* 가족. 애니는 8남매의 막내다 */
+  'f-mom':         { kr:'엄마', en:'mum', tag:'family' },
+  'f-dad':         { kr:'아빠', en:'dad', tag:'family' },
+  'f-oppa':        { kr:'오빠', en:'older brother (she says)', tag:'family' },
+  'f-nuna':        { kr:'누나', en:'older sister (he says)', tag:'family' },
+  'f-eonni':       { kr:'언니', en:'older sister (she says)', tag:'family' },
+  'f-dongsaeng':   { kr:'동생', en:'younger sibling', tag:'family' },
+  'f-maknae':      { kr:'막내', en:'the youngest one', tag:'family' },
+  /* 고유어 숫자 1~10 */
+  'num-0':         { kr:'영', en:'zero', tag:'number' },
+  'num-1':         { kr:'하나', en:'one', tag:'number' },
+  'num-2':         { kr:'둘', en:'two', tag:'number' },
+  'num-3':         { kr:'셋', en:'three', tag:'number' },
+  'num-4':         { kr:'넷', en:'four', tag:'number' },
+  'num-5':         { kr:'다섯', en:'five', tag:'number' },
+  'num-6':         { kr:'여섯', en:'six', tag:'number' },
+  'num-7':         { kr:'일곱', en:'seven', tag:'number' },
+  'num-8':         { kr:'여덟', en:'eight', tag:'number' },
+  'num-9':         { kr:'아홉', en:'nine', tag:'number' },
+  'num-10':        { kr:'열', en:'ten', tag:'number' },
+  /* 문장 */
+  's-eaten':       { kr:'밥 먹었어요?', en:'have you eaten (= are you doing okay)', tag:'phrase' },
+  's-fine':        { kr:'괜찮아요', en:'I am fine / no thanks', tag:'phrase' },
+  's-tea':         { kr:'차 줘요', en:'give me tea (she built this herself)', tag:'phrase' },
+  's-yes':         { kr:'네', en:'yes, polite', tag:'phrase' },
+  's-no':          { kr:'아니요', en:'no, polite', tag:'phrase' }
 };
 
 if (typeof module !== 'undefined') module.exports = { BANK };

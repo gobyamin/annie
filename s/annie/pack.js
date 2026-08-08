@@ -16,17 +16,17 @@
 window.STUDENT_PACK = {
 
 "student": "Annie",
-"level": "Level 0 · lesson 2",
+"level": "Level 0 · lesson 3 next",
 "focus": "Madrid. Spanish and Italian speaker. Watches Korean drama with subtitles.",
 "note": "스페인어 5모음(a e i o u)이 ㅏㅔㅣㅗㅜ 에 그대로 붙는다. 여기서 자신감을 잡는다. ㅓ 와 ㅡ 는 대응 소리가 없어 제일 오래 걸리고, ㄱ/ㅋ/ㄲ 3단은 스페인어에 2단도 없어서 한참 뒤로 미룬다. ㄹ 은 pero 의 단타 r 이라 공짜다.",
 
 "letters": {
-  "vowels":     ["ㅏ", "ㅔ", "ㅣ", "ㅗ", "ㅜ"],
-  "consonants": ["ㄴ", "ㅇ"]
+  "vowels":     ["ㅏ", "ㅑ", "ㅓ", "ㅕ", "ㅗ", "ㅛ", "ㅜ", "ㅠ", "ㅡ", "ㅣ", "ㅐ", "ㅔ"],
+  "consonants": ["ㄱ", "ㄴ", "ㄷ", "ㄹ", "ㅁ", "ㅂ", "ㅅ", "ㅇ", "ㅈ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"]
 },
 
 "blocks": {
-  "targets": ["아", "이", "오", "우", "에", "니", "애"],
+  "targets": ["아", "에", "애", "이", "오", "우", "나", "니", "누"],
   "examples": ["아", "니"],
   "finals": [""]
 },
