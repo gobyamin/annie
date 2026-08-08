@@ -4,9 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Korean</title>
+<!-- 이 저장소는 애니 것이다. 저장소 이름이 이미 annie 이므로 뿌리를 그 학생 선반으로 보낸다.
+     이유: 애니가 이미 이 주소를 갖고 있다. 예전에 여기가 1회차 덱이었다.
+     학생이 늘면 저장소를 따로 판다. 그래야 서로 남의 자료를 못 본다.
+     선생님용 앱 목록은 /apps/ 로 직접 간다. -->
+<link rel="canonical" href="s/annie/">
+<meta http-equiv="refresh" content="0; url=s/annie/">
+<script>location.replace('s/annie/' + location.search + location.hash);</script>
 <link rel="stylesheet" href="apps/assets/_ui.css">
 <style>
-body{max-width:520px;margin:0 auto;padding:60px 20px;text-align:center;font-size:17px}
+body{max-width:520px;margin:0 auto;padding:70px 20px;text-align:center;font-size:17px}
 h1{font-size:34px;margin:0 0 10px;letter-spacing:-.02em}
 .hseal{display:inline-flex;align-items:center;justify-content:center;width:1.25em;height:1.25em;
   margin-right:.3em;border-radius:.22em;background:var(--seal);color:var(--seal-ink);font-size:.72em;
@@ -15,15 +22,12 @@ p{color:var(--muted);font-weight:600;margin:0 0 26px}
 a.go{display:inline-block;background:var(--card);border:3px solid var(--line);border-radius:15px;
   box-shadow:var(--sh);padding:16px 26px;font-weight:800;text-decoration:none;color:var(--ink);font-size:18px}
 a.go:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--line)}
-small{display:block;color:var(--muted);font-weight:700;font-size:12.5px;margin-top:30px;line-height:1.6}
 </style>
 </head>
 <body>
-<!-- 뿌리 페이지에는 학생 이름을 두지 않는다. 학생 선반은 /s/<이름>/ 으로 직접 간다.
-     공개 저장소라 이 페이지는 누구나 본다. -->
+<!-- 자동 이동이 막힌 경우에만 보인다 -->
 <h1><span class="hseal kr">한</span>Korean</h1>
-<p>Practice apps for absolute beginners.</p>
-<a class="go" href="apps/index.html">Open the apps →</a>
-<small>If your teacher gave you a personal link, use that one instead.<br>It has your own lessons in it.</small>
+<p>Taking you to your lessons.</p>
+<a class="go" href="s/annie/">Go to my lessons &rarr;</a>
 </body>
 </html>

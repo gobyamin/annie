@@ -53,7 +53,7 @@ var LESSONS = [
     words: [
       'w-coffee','w-radio','w-school','w-friend','w-house','w-mountain',
       'w-karaoke','w-daebak','w-mwohae','w-aegyo','w-me','w-you','w-cha',
-      'w-dog','w-cat','w-babo','w-hand','w-money','w-room',
+      'w-dog','w-cat','w-babo','w-money',
       'f-mom','f-dad','f-oppa','f-nuna','f-eonni','f-dongsaeng','f-maknae',
       'num-1','num-2','num-3','num-4','num-5','num-6','num-7','num-8','num-9','num-10',
       'thanks','s-eaten','s-fine','s-tea','s-yes','s-no',
