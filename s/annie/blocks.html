@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>한글블록 · Hangeul Blocks</title>
+<title>Hangeul Blocks</title>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gowun+Dodum&display=swap" rel="stylesheet">
 <style>
 /* 둥근 영어 글꼴. 파일에 박아 넣어서 네트워크 요청이 없다.
@@ -258,29 +258,29 @@
 
 <div class="brand">
   <div class="logo">
-    <div class="ko">한글블록</div>
+    <div class="ko">Hangeul Blocks</div>
     <div class="en">HANGEUL BLOCKS</div>
   </div>
   <div class="score">
-    <div class="chip">연속 정답<b id="streak">0</b></div>
-    <div class="chip">최고 기록<b id="best">0</b></div>
+    <div class="chip">in a row<b id="streak">0</b></div>
+    <div class="chip">best<b id="best">0</b></div>
   </div>
 </div>
 <div class="saekdong"></div>
 
 <!-- SETUP -->
 <div class="panel setup" id="setup">
-  <h2>오늘의 단어를 만들어 볼까요?</h2>
-  <div class="sub">단어를 입력하면 한글 조각으로 분해됩니다. 소리를 들려주고, 학생이 조립하게 하세요.</div>
+  <h2>Shall we build today’s words?</h2>
+  <div class="sub">Type any Korean word and it splits into pieces. Listen, then put it back together.</div>
   <div class="whofor" id="whofor"></div>
   <div class="inputrow">
-    <input type="text" id="wordInput" placeholder="지민" autocomplete="off" aria-label="한글 단어 입력">
-    <button id="startBtn">블록 만들기</button>
+    <input type="text" id="wordInput" placeholder="커피" autocomplete="off" aria-label="Type a Korean word">
+    <button id="startBtn">Build it</button>
   </div>
   <div class="preview" id="preview"></div>
   <div class="plabel">
-    <span id="setLabel">오늘의 세트</span>
-    <button class="go" id="runSetBtn">세트 처음부터 →</button>
+    <span id="setLabel">Today’s words</span>
+    <button class="go" id="runSetBtn">Start over →</button>
   </div>
   <div class="presets" id="presets"></div>
 </div>
@@ -288,7 +288,7 @@
 <!-- GAME -->
 <div class="panel game" id="game">
   <div class="gamehead">
-    <div class="task">소리를 듣고 블록을 <b>순서대로</b> 눌러 조립하세요</div>
+    <div class="task">Listen, then put the blocks <b>in order</b> 눌러 조립하세요</div>
     <div class="beads" id="beads"></div>
   </div>
   <div class="setbar" id="setbar"></div>
@@ -298,14 +298,14 @@
       <div class="en" id="cueEn">—</div>
       <div class="hint" id="cueHint"></div>
     </div>
-    <button class="listen" id="listenBtn" title="한국어로 듣기">🔊 듣기</button>
+    <button class="listen" id="listenBtn" title="Hear it in Korean">🔊 듣기</button>
   </div>
   <div class="rail" id="rail"></div>
   <div class="tray" id="tray"></div>
   <div class="controls">
-    <button id="undoBtn">← 하나 지우기</button>
-    <button id="revealBtn">답 보여주기</button>
-    <button id="quitBtn">세트로 돌아가기</button>
+    <button id="undoBtn">← Undo</button>
+    <button id="revealBtn">Show me</button>
+    <button id="quitBtn">Back to the list</button>
   </div>
 </div>
 
@@ -313,14 +313,14 @@
 <div class="overlay" id="overlay">
   <div class="win">
     <div class="strip"></div>
-    <div class="stamp" id="stamp">참<br>잘했어요<small>REAL KOREAN</small></div>
-    <div class="word" id="winWord" title="다시 듣기"></div>
+    <div class="stamp" id="stamp">참<br>Nice!<small>REAL KOREAN</small></div>
+    <div class="word" id="winWord" title="Play again"></div>
     <div class="en" id="winEn"></div>
     <div class="batchimnote" id="winBatchim"></div>
     <div class="count" id="winCount"></div>
     <div class="btns">
-      <button class="retry" id="retryBtn">다시 하기</button>
-      <button class="next" id="nextBtn">다음 →</button>
+      <button class="retry" id="retryBtn">Try again</button>
+      <button class="next" id="nextBtn">Next →</button>
     </div>
   </div>
 </div>
@@ -430,7 +430,7 @@ function renderSetHeader(){
     box.style.display = "block";
     box.innerHTML = bits.join(" · ") + (SET.note ? "<span class='why'>" + esc(SET.note) + "</span>" : "");
   }
-  $("setLabel").textContent = SET.student ? (SET.student + " 세트 · " + items().length + "개") : ("오늘의 세트 · " + items().length + "개");
+  $("setLabel").textContent = SET.student ? (SET.student + " 세트 · " + items().length + "개") : ("Today’s words · " + items().length + "개");
 }
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 
@@ -623,7 +623,7 @@ function win(revealed){
     (revealed ? " · 답 보고 맞춤" : " · 연속 " + streak + "회");
 
   const hasNext = setIndex >= 0 && setIndex + 1 < items().length;
-  $("nextBtn").textContent = hasNext ? "다음 단어 →" : "세트로 돌아가기 →";
+  $("nextBtn").textContent = hasNext ? "다음 단어 →" : "Back to the list →";
 
   const st = $("stamp"); st.style.animation = "none"; void st.offsetWidth; st.style.animation = "";
   $("overlay").style.display = "flex";
