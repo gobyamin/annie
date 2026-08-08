@@ -111,6 +111,45 @@
       '</section>';
   }
 
+
+  /* 할 수 있는 것. 회차가 켠 것은 날짜와 함께, 아직인 것은 흐리게.
+     꺼진 것도 보여준다. 다음이 뭔지 알면 불안이 줄어든다.
+     전체 대비 퍼센트는 절대 안 보인다. 남은 것을 세면 절망이 된다. */
+  function canDo() {
+    var LIST = (typeof CANDO !== 'undefined') ? CANDO : [];
+    if (!LIST.length) return '';
+    var when = {};
+    L.forEach(function (x) {
+      (x.can || []).forEach(function (id) {
+        if (!when[id] || x.date < when[id]) when[id] = x.date;
+      });
+    });
+    var done = LIST.filter(function (c) { return when[c.id]; });
+    if (!done.length) return '';
+    var rows = LIST.map(function (c) {
+      var d = when[c.id];
+      return '<li class="cd' + (d ? ' on' : '') + '">' +
+        '<span class="bx">' + (d ? '✓' : '') + '</span>' +
+        '<span class="tx">' + esc(c.en) +
+        (d ? '<i>' + esc(whenShort(d)) + '</i>' : '') +
+        (d && c.note ? '<small>' + esc(c.note) + '</small>' : '') +
+        '</span></li>';
+    }).join('');
+    return '<section class="lesson cando">' +
+      '<div class="lhead"><div class="seal">✓</div><div class="lmeta">' +
+        '<div class="ldate">' + done.length + ' so far</div>' +
+        '<h2>What you can do now</h2></div></div>' +
+      '<p class="sum">Not a score. Just the things that actually work. ' +
+        'The grey ones are what comes next, so you know where this is going.</p>' +
+      '<ul class="cdlist">' + rows + '</ul>' +
+      '</section>';
+  }
+
+  function whenShort(iso) {
+    var p = (iso || '').split('-');
+    return p.length === 3 ? (+p[1]) + '/' + (+p[2]) : iso;
+  }
+
   document.title = (S.name ? S.name + ' · ' : '') + 'Korean';
 
   document.body.innerHTML =
@@ -120,6 +159,7 @@
         'Newest first. Everything stays here.</div>' +
     '</header>' +
     '<main>' +
+      canDo() +
       L.map(function (x, i) { return lessonCard(x, i === 0); }).join('') +
       allSoFar() +
       '<div class="foot">Made for ' + esc(S.name || 'you') + '. ' +

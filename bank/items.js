@@ -100,7 +100,7 @@ var BANK = {
   /* 문장 */
   's-eaten':       { kr:'밥 먹었어요?', en:'have you eaten (= are you doing okay)', tag:'phrase' },
   's-fine':        { kr:'괜찮아요', en:'I am fine / no thanks', tag:'phrase' },
-  's-tea':         { kr:'차 줘요', en:'give me tea (she built this herself)', tag:'phrase' },
+  's-tea':         { kr:'차 주세요', en:'tea, please (she built this herself)', tag:'phrase' },
   's-yes':         { kr:'네', en:'yes, polite', tag:'phrase' },
   's-no':          { kr:'아니요', en:'no, polite', tag:'phrase' },
 

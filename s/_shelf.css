@@ -57,3 +57,17 @@ a.it .go{color:var(--muted);font-size:21px;line-height:1;flex:0 0 auto}
 
 .foot{color:var(--muted);font-size:12.5px;font-weight:700;text-align:center;margin-top:26px;
   line-height:1.5}
+
+/* 할 수 있는 것 */
+.lesson.cando{background:var(--sky)}
+.cdlist{list-style:none;margin:11px 0 0;padding:0}
+.cd{display:flex;gap:9px;align-items:flex-start;padding:5px 0;
+  border-bottom:1px solid rgba(0,0,0,.055)}
+.cd:last-child{border-bottom:0}
+.cd .bx{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--hair);border-radius:6px;
+  font-size:12px;font-weight:800;line-height:16px;text-align:center;color:transparent;margin-top:1px}
+.cd.on .bx{background:var(--green);border-color:var(--green);color:#fff}
+.cd .tx{font-size:14.5px;font-weight:700;color:var(--muted);line-height:1.35}
+.cd.on .tx{color:var(--ink);font-weight:800}
+.cd .tx i{font-style:normal;color:var(--muted);font-weight:700;font-size:12px;margin-left:6px}
+.cd .tx small{display:block;color:var(--muted);font-weight:600;font-size:12.5px;margin-top:1px}

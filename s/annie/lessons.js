@@ -32,7 +32,8 @@ var LESSONS = [
         label:'Lesson 1 handout', sub:'2 pages, print or read on the phone' }
     ],
     /* 소리로만 나갔고 글자로는 아직 안 봤다. 그래도 말할 수 있으면 배운 것이다. */
-    words: ['hello', 'nice', 'bye-going', 'bye-stay', 'good', 'sleepwell', 'n-kimareum']
+    words: ['hello', 'nice', 'bye-going', 'bye-stay', 'good', 'sleepwell', 'n-kimareum'],
+    can: ['cd-greet']
   }
 
   ,{
@@ -50,6 +51,8 @@ var LESSONS = [
         label:'The vowels on their own', sub:'tap any one to hear it' },
       { kind:'app', app:'01-hangul-letter-lab.html',
         label:'The consonant story', sub:'the pictures, one at a time' },
+      { kind:'tool', file:'blocks.html',
+        label:'Build a word', sub:'커피 · 타투 · 차은우 · 올리브영. Or type your own' },
       { kind:'app', app:'02-syllable-builder.html',
         label:'Build a block', sub:'put the letters together yourself' }
     ],
@@ -61,7 +64,9 @@ var LESSONS = [
       'num-1','num-2','num-3','num-4','num-5','num-6','num-7','num-8','num-9','num-10',
       'thanks','s-eaten','s-fine','s-tea','s-yes','s-no',
       'n-eunwoo','n-astro','sp-1','sp-2'
-    ]
+    ],
+    can: ['cd-vowels','cd-cons','cd-bias','cd-loanword',
+          'cd-intro','cd-count','cd-family','cd-polite']
   }
 
   /* 3회차는 수업이 끝난 뒤에 여기에. 위 덩어리를 복사해서 날짜와 내용만 바꾼다.
