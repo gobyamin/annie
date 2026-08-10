@@ -88,13 +88,22 @@
   function pickDir(box, canRead, it) {
     /* ⚠️ 말하기가 가운데다. 끝이 아니다.
        고르기는 알아보는 능력만 늘리고 말할 때는 안 나온다.
-       5단계 중 3단계를 말하기로 둔 것은 그래서다. */
+
+       ⚠️ 1번 상자에서만 고르기를 쓴다. 전에는 2번까지 고르기였는데,
+          상자가 하루에 한 칸씩 오르니 말하기까지 나흘이 걸렸다.
+          수업에서 이미 소리 내어 말해본 낱말이라 그렇게 느릴 이유가 없다. */
+    if (FORCE_SAY) return 'say';                      // 미리보기용 (?say=1)
     if (it && isLong(it) && box > 1) return 'say';    // 문장·긴 표현은 바로 말하기로
-    if (box <= 2) return 'hear-mean';                 // 처음엔 알아보기. 이때는 이게 맞다
+    if (box <= 1) return 'hear-mean';                 // 처음 만나는 것만 알아보기
+    if (box === 2) return 'say';
     if (box === 3) return canRead ? 'read-mean' : 'say';
     if (box === 4) return 'say';
     return canRead ? 'hear-read' : 'say';
   }
+
+  /* 선생님이 말하기 화면을 바로 보실 수 있게. 주소에 ?say=1 을 붙이면 된다.
+     학생은 붙일 일이 없고, 붙여도 진도가 망가지지 않는다 (상자는 그대로 오른다). */
+  var FORCE_SAY = /[?&]say=1/.test(location.search);
 
   /* ── 오늘 뽑기 ───────────────────────────────────────────
      순서: 선생님이 찍은 약점 → 복습 때 된 것 → 최근 회차 → 나머지 */
