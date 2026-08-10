@@ -50,13 +50,28 @@
     try { localStorage.setItem(KEY, JSON.stringify(ST)); } catch (e) {}
   }
 
-  /* 이번 주 몇 번 했나. 월요일 시작 */
-  function weekCount() {
+  /* 이번 주. 월요일 시작 */
+  function monday() {
     var d = new Date(), dow = (d.getDay() + 6) % 7;   // 월=0
     d.setDate(d.getDate() - dow);
+    return d;
+  }
+  function weekCount() {
+    var d = monday();
     var mon = d.getFullYear() + '-' +
       ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
     return ST.days.filter(function (x) { return x >= mon; }).length;
+  }
+  /* 이번 주 중 나온 요일 번호 (월=0). 도장을 어디에 찍을지 정한다 */
+  function weekDays() {
+    var out = [], base = monday();
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(base.getTime()); d.setDate(base.getDate() + i);
+      var s = d.getFullYear() + '-' +
+        ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+      if (ST.days.indexOf(s) >= 0) out.push(i);
+    }
+    return out;
   }
   function doneToday() { return ST.days.indexOf(today()) >= 0; }
 
@@ -144,20 +159,34 @@
 
   /* ── 겉모습 ──────────────────────────────────────────────
      선반·앱과 같은 얼굴을 쓴다. 색은 _ui.css 의 변수에서 가져온다 */
+  /* ── 오늘 카드 ──────────────────────────────────────────────
+     이 카드가 화면의 주인공이다. 학생이 문을 열면 제일 먼저, 크게 보여야 한다.
+
+     대담한 것은 한 군데만 쓴다. 여기서는 **낙관 도장**이다.
+     이 디자인 언어에 원래 있던 것이고, 한 주에 나온 날마다 종이에 자국이 남는다.
+     퍼센트도 아니고 큰 숫자도 아니다. 그건 어느 앱에나 있는 답이다. */
   var CSS =
-  '.rv-card{background:var(--card);border:3px solid var(--line);border-radius:18px;' +
-  'box-shadow:var(--sh);padding:18px 18px 16px;margin:0 0 18px}' +
-  '.rv-card h2{margin:0 0 4px;font-size:20px;letter-spacing:-.01em}' +
-  '.rv-card p{margin:0 0 14px;color:var(--muted);font-weight:600;font-size:14px;line-height:1.5}' +
+  '.rv-card{background:var(--card);border:3px solid var(--line);border-radius:22px;' +
+  'box-shadow:var(--sh);padding:26px 22px 22px;margin:0 0 16px}' +
+  '.rv-card .kick{font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;' +
+  'color:var(--muted);margin-bottom:6px}' +
+  '.rv-card h2{margin:0 0 8px;font-size:34px;line-height:1.08;letter-spacing:-.025em;font-weight:800}' +
+  '.rv-card p{margin:0 0 20px;color:var(--muted);font-weight:600;font-size:15px;line-height:1.5}' +
   '.rv-go{display:block;width:100%;background:var(--seal);color:var(--seal-ink);' +
-  'border:0;border-radius:13px;padding:15px;font:inherit;font-weight:800;font-size:17px;' +
+  'border:0;border-radius:15px;padding:18px;font:inherit;font-weight:800;font-size:19px;' +
   'cursor:pointer;box-shadow:0 4px 0 var(--seal-rim)}' +
   '.rv-go:active{transform:translateY(3px);box-shadow:none}' +
   '.rv-go[disabled]{opacity:.55;cursor:default;transform:none;box-shadow:0 4px 0 var(--seal-rim)}' +
-  '.rv-week{display:flex;gap:5px;margin:0 0 13px}' +
-  '.rv-week i{width:22px;height:7px;border-radius:4px;background:var(--line)}' +
-  '.rv-week i.on{background:var(--seal)}' +
-  '.rv-more{display:block;width:100%;margin-top:9px;background:none;border:0;' +
+
+  /* 한 주. 나온 날에 도장이 찍힌다. 안 나온 날은 빈 자리로 조용히 둔다 */
+  '.rv-week{display:flex;gap:7px;margin:0 0 20px}' +
+  '.rv-week b{flex:1;aspect-ratio:1;max-width:38px;border-radius:8px;display:flex;' +
+  'align-items:center;justify-content:center;font-size:12px;font-weight:800;' +
+  'border:2px solid var(--hair);color:var(--muted);background:transparent}' +
+  '.rv-week b.on{background:var(--seal);color:var(--seal-ink);border-color:var(--seal);' +
+  'box-shadow:inset 0 0 0 2px rgba(255,255,255,.28)}' +
+  '.rv-week b.now{border-color:var(--ink);border-style:dashed}' +
+  '.rv-more{display:block;width:100%;margin-top:11px;background:none;border:0;' +
   'color:var(--muted);font:inherit;font-weight:700;font-size:13px;cursor:pointer;' +
   'text-decoration:underline;padding:6px}' +
 
@@ -265,24 +294,36 @@
     cardHtml: function () {
       if (!this.pool.length) return '';
       var wc = weekCount(), done = doneToday();
-      var dots = '';
-      for (var i = 0; i < 7; i++) dots += '<i class="' + (i < wc ? 'on' : '') + '"></i>';
+
+      /* 월요일부터 오늘까지. 나온 날에만 도장이 찍힌다.
+         안 나온 날은 X 도 아니고 빨간색도 아니다. 그냥 빈 자리다.
+         못 한 날을 세는 화면은 그만두는 이유가 된다. */
+      var days = weekDays(), lbl = ['M','T','W','T','F','S','S'], t = today(), grid = '';
+      for (var i = 0; i < 7; i++) {
+        var on = days.indexOf(i) >= 0;
+        var isNow = i === ((new Date().getDay() + 6) % 7);
+        grid += '<b class="' + (on ? 'on' : '') + (isNow && !on ? ' now' : '') + '">' +
+                lbl[i] + '</b>';
+      }
+      var week = '<div class="rv-week">' + grid + '</div>';
 
       if (done) {
         return '<section class="rv-card">' +
-          '<h2>Done for today</h2>' +
-          '<div class="rv-week">' + dots + '</div>' +
-          '<p>' + wc + ' ' + (wc === 1 ? 'day' : 'days') + ' this week. ' +
-            'Come back tomorrow, that is all it takes.</p>' +
+          '<div class="kick">today</div>' +
+          '<h2>Done.</h2>' +
+          week +
+          '<p>' + (wc === 1 ? 'First day this week.' : wc + ' days this week.') +
+            ' Tomorrow is all it takes.</p>' +
           '<button class="rv-more" id="rvGo">One more round anyway</button>' +
           '</section>';
       }
       return '<section class="rv-card">' +
-        '<h2>Today</h2>' +
-        (wc ? '<div class="rv-week">' + dots + '</div>' : '') +
-        '<p>' + this.N + ' things. About forty seconds.' +
-          (wc ? ' ' + wc + ' ' + (wc === 1 ? 'day' : 'days') + ' this week so far.' : '') +
-        '</p>' +
+        '<div class="kick">today</div>' +
+        '<h2>' + this.N + ' things,<br>forty seconds.</h2>' +
+        week +
+        '<p>' + (wc ? 'You have shown up ' + wc + ' ' + (wc === 1 ? 'day' : 'days') +
+                      ' this week. Keep it going.'
+                    : 'Tap a word, hear it, say it back. That is the whole thing.') + '</p>' +
         '<button class="rv-go" id="rvGo">Start</button>' +
         '</section>';
     },

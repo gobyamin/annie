@@ -31,11 +31,15 @@ body{margin:0;font-size:17px}
 .tab-on{color:var(--seal)}
 .tab-on .tab-label{font-weight:900}
 
-.top h1{font-size:clamp(24px,6vw,34px);margin:0;letter-spacing:-.02em;display:flex;align-items:center}
-.hseal{display:inline-flex;align-items:center;justify-content:center;width:1.3em;height:1.3em;
-  margin-right:.36em;border-radius:.22em;background:var(--seal);color:var(--seal-ink);font-size:.7em;
-  box-shadow:inset 0 0 0 .09em var(--seal-rim);flex:0 0 auto}
-.top .sub{color:var(--muted);font-size:14.5px;font-weight:600;margin-top:7px}
+/* 머리글은 주인공이 아니다. 매일 여는 화면이라 학생 이름을 크게 외칠 이유가 없다.
+   자리를 비워서 아래 오늘 카드가 주인공이 되게 한다. */
+.top{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:16px}
+.top h1{font-size:17px;margin:0;letter-spacing:-.01em;display:flex;align-items:center;
+  font-weight:800;color:var(--muted)}
+.hseal{display:inline-flex;align-items:center;justify-content:center;width:1.45em;height:1.45em;
+  margin-right:.4em;border-radius:.24em;background:var(--seal);color:var(--seal-ink);font-size:.82em;
+  box-shadow:inset 0 0 0 .1em var(--seal-rim);flex:0 0 auto}
+.top .sub{color:var(--muted);font-size:13px;font-weight:600;margin:0}
 
 .lesson{background:var(--card);border:3px solid var(--line);border-radius:20px;box-shadow:var(--sh);
   padding:15px 16px;margin-top:16px}
