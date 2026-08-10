@@ -123,8 +123,12 @@
   /* ── 오늘 뽑기 ───────────────────────────────────────────
      순서: 선생님이 찍은 약점 → 복습 때 된 것 → 최근 회차 → 나머지 */
   function pickToday(pool, weak, n) {
+    /* ⚠️ 먼저 섞는다. 은행 순서 그대로 두면 같은 분류가 뭉쳐서 나온다.
+       가족 낱말 다섯 개가 연달아 나오면 그 회차가 통째로 가족 시험이 된다.
+       섞은 뒤에 우선순위로 정렬하므로, 같은 순위 안에서만 무작위가 된다. */
+    var mixed = shuffle(pool.slice());
     var t = today(), rank = {};
-    pool.forEach(function (w, i) {
+    mixed.forEach(function (w, i) {
       var st = ST.words[w.id];
       var r;
       if (weak.indexOf(w.id) >= 0) r = 0;
@@ -133,9 +137,19 @@
       else r = 3;
       rank[w.id] = r * 1000 + i;
     });
-    return pool.slice()
-      .sort(function (a, b) { return rank[a.id] - rank[b.id]; })
-      .slice(0, n);
+    var out = mixed.sort(function (a, b) { return rank[a.id] - rank[b.id]; }).slice(0, n);
+
+    /* 그래도 같은 분류가 붙어 나오면 한 칸 밀어 떨어뜨린다 */
+    for (var k = 1; k < out.length; k++) {
+      if (out[k].tag && out[k].tag === out[k - 1].tag) {
+        for (var j = k + 1; j < out.length; j++) {
+          if (out[j].tag !== out[k - 1].tag) {
+            var tmp = out[k]; out[k] = out[j]; out[j] = tmp; break;
+          }
+        }
+      }
+    }
+    return out;
   }
 
   /* 보기 3개. 같은 분류에서 먼저 뽑는다. 헷갈려야 실력이 된다 */
@@ -471,9 +485,11 @@
             var mineRow = myBlob
               ? '<button class="rv-pl mine" id="rvMy">🔊<span class="who">You' +
                 '<small>just now</small></span></button>' : '';
+            /* 답에는 한국어만 크게 둔다. 뜻은 방금 질문에 있었다.
+               "your older brother" 라고 물어놓고 답에 "older brother" 를 또 쓰면
+               읽을 것만 늘고 정작 봐야 할 글자가 작아진다. */
             wrap.querySelector('#rvOpts').innerHTML =
-              '<div class="rv-tell"><b class="kr">' + esc(it.kr) + '</b>' +
-                (it.ask ? '<br>' + esc(it.en) : '') + '</div>' +
+              '<div class="rv-tell"><b class="kr">' + esc(it.kr) + '</b></div>' +
               '<div class="rv-pair">' +
                 (hasAudio ? '<button class="rv-pl" id="rvRef">🔊<span class="who">' +
                   esc(S_NAME) + '<small>the model</small></span></button>' : '') +
