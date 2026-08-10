@@ -119,6 +119,7 @@ if (fs.existsSync(VBSRC)) {
 const STUDENTS = [
   { dir: '9_학생_애니', slug: 'annie' },
   { dir: '9_학생_머피', slug: 'murphy' },
+  { dir: '9_학생_Marie', slug: 'marie' },
 ];
 let decks = 0, kept = 0;
 const problems = [];

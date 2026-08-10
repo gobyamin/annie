@@ -43,6 +43,9 @@ var CANDO = [
   { id:'cd-ask',      en:'ask someone how they are',                tag:'speaking' },
   { id:'cd-nothanks', en:'say no politely',                         tag:'speaking' },
   { id:'cd-lost',     en:'say I do not understand',                 tag:'speaking' },
+  { id:'cd-korname',  en:'know my own Korean name and what it means', tag:'speaking' },
+  { id:'cd-byepair',  en:'say goodbye two ways, depending on who leaves', tag:'speaking',
+    note:'안녕히 가세요 / 안녕히 계세요. Most beginners never learn both.' },
 
   /* ── 듣기 ────────────────────────────────────────────── */
   { id:'cd-hear-3',   en:'hear the difference between ㄱ ㅋ ㄲ',     tag:'listening',
